@@ -9,7 +9,7 @@ on:
 
 jobs:
   Build:
-    runs-on: windows-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
 
@@ -32,7 +32,7 @@ jobs:
     name: Deploy to Staging 
     if: github.event.ref == 'refs/heads/main'
     needs: [Build]
-    runs-on: [self-hosted,PSL-APP-VM3]
+    runs-on: self-hosted
     environment: 
       name: Staging
       url: 'http://test.myapp.com'
@@ -43,7 +43,7 @@ jobs:
   DeployProd:
     name: Deploy to Production 
     needs: [DeployStaging]
-    runs-on: [self-hosted,PSL-APP-VM3]
+    runs-on: self-hosted
     environment: 
       name: Production
       url: 'http://www.myapp.com'
