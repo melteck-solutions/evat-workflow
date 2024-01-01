@@ -15,6 +15,7 @@ jobs:
       - name: Compile
         run: echo Hello, world!
   calling:
+    needs: [Build]
     permissions:
       contents: read
       packages: read
