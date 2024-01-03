@@ -8,17 +8,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  build:
     runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
-      - name: Compile
+      - name: Build with dotnet
         run: echo Hello, world!
+
         
+  test:
+    needs: build
+    runs-on: psl-app-vm3
+    steps:
+    - name: Test
+      run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
+      
   AutoMerge:
     name: Merge pull request
     runs-on: psl-app-vm3
-    needs: [Build]
+    needs: [build]
     if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
     steps:
         - name: Merge
@@ -33,7 +41,7 @@ jobs:
            github-token: ${{ github.token }}
 
   Linter:
-    needs: [Build]
+    needs: [build]
     permissions:
       contents: read
       packages: read
