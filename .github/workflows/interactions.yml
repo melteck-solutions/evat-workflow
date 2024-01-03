@@ -10,7 +10,7 @@ on:
 
 jobs:
   response:
-    runs-on: psl-app-vm3
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/first-interaction@main
