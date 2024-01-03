@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "evat-workflow", "evat-workflow\evat-workflow.csproj", "{6DCB2F64-78CB-4FC6-999C-D86A67E1F7A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "evat-workflow", "evat-workflow\evat-workflow.csproj", "{6DCB2F64-78CB-4FC6-999C-D86A67E1F7A9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79491940-D6F5-4619-BE2B-AE7316BF302D}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci-cd-pipeline.yml = .github\workflows\ci-cd-pipeline.yml
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

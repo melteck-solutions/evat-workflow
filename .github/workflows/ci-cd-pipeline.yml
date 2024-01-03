@@ -9,7 +9,7 @@ on:
 
 jobs:
   Build:
-    runs-on: self-hosted
+    runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
       - name: Compile
@@ -17,7 +17,7 @@ jobs:
         
   AutoMerge:
     name: Merge pull request
-    runs-on: self-hosted
+    runs-on: psl-app-vm3
     needs: [Build]
     if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
     steps:
@@ -44,7 +44,7 @@ jobs:
     name: Deploy to Dev 
     if: github.event_name != 'pull_request'
     needs: [Linter]
-    runs-on: self-hosted
+    runs-on: psl-app-vm3
     environment: 
       name: Development
       url: 'http://dev.myapp.com'
@@ -56,7 +56,7 @@ jobs:
     name: Deploy to Staging 
     if: github.event.ref == 'refs/heads/master'
     needs: [Linter]
-    runs-on: self-hosted
+    runs-on: psl-app-vm3
     environment: 
       name: Staging
       url: 'http://test.myapp.com'
@@ -67,7 +67,7 @@ jobs:
   DeployProd:
     name: Deploy to Production 
     needs: [DeployStaging]
-    runs-on: self-hosted
+    runs-on: psl-app-vm3
     environment: 
       name: Production
       url: 'http://www.myapp.com'
