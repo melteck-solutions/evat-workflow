@@ -17,21 +17,23 @@ jobs:
       - name: Setup .NET Core ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 5.0.x
+          dotnet-version: 6.0.x
 
+      - name: Install dependencies ⛑️⛑️
+        run: dotnet restore
+      
       - name: Build with dotnet ⚒️⚒️
-        run: dotnet build --configuration Release .\evat-workflow
+        run: dotnet build --configuration Release --no-restore
 
       - name: Upload Artifact to local folder ⤴️⤴️ 
         run: |
-          dotnet publish -c Release -o dotnetcorewebapp .\evat-workflow
-
+          dotnet publish --configuration Release --no-restore --output ./publish
         
   test:
     needs: build
     runs-on: psl-app-vm3
     steps:
-    - name: Test 🔍🔎
+    - name: Running a Unit Test 🔍🔎
       run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
       
   AutoMerge:
@@ -51,7 +53,7 @@ jobs:
             })
            github-token: ${{ github.token }}
 
-  Linter:
+  linter:
     needs: [build]
     permissions:
       contents: read
@@ -62,7 +64,7 @@ jobs:
   DeployDev:
     name: Deploy to IIS Dev (APP-VM3)
     if: github.event_name != 'pull_request'
-    needs: [Linter]
+    needs: [linter]
     runs-on: psl-app-vm3
     environment: 
       name: Development
