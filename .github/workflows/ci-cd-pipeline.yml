@@ -97,7 +97,7 @@ jobs:
         
   DeployProd:
     name: Deploy to IIS Production 
-    needs: [DeployStaging2]
+    needs: [DeployStaging1, DeployStaging2]
     runs-on: psl-app-vm3
     environment: 
       name: Production
