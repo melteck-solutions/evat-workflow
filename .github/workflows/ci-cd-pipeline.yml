@@ -12,6 +12,20 @@ jobs:
     runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
+
+      # setup dotnet
+      - name: Setup .NET Core ⚙️⚙️
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 5.0.0
+
+      - name: Build with dotnet ⚒️⚒️
+        run: dotnet build --configuration Release .\evat-workflow
+
+      - name: Upload Artifact to local folder ⤴️⤴️ 
+        run: |
+          dotnet publish -c Release -o dotnetcorewebapp .\evat-workflow
+        
       - name: Build with dotnet
         run: echo Hello, world!
 
@@ -20,7 +34,7 @@ jobs:
     needs: build
     runs-on: psl-app-vm3
     steps:
-    - name: Test
+    - name: Test 🔍🔎
       run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
       
   AutoMerge:
@@ -49,7 +63,7 @@ jobs:
     uses: vbem/reusable/.github/workflows/superlinter.yml@v1
     
   DeployDev:
-    name: Deploy to Dev 
+    name: Deploy to IIS Dev ( PSL-APP-VM3 )
     if: github.event_name != 'pull_request'
     needs: [Linter]
     runs-on: psl-app-vm3
@@ -61,7 +75,7 @@ jobs:
         run: echo I am deploying! 
     
   DeployStaging:
-    name: Deploy to Staging 
+    name: Deploy to IIS Staging 
     if: github.event.ref == 'refs/heads/master'
     needs: [Linter]
     runs-on: psl-app-vm3
@@ -73,7 +87,7 @@ jobs:
         run: echo I am deploying! 
             
   DeployProd:
-    name: Deploy to Production 
+    name: Deploy to IIS Production 
     needs: [DeployStaging]
     runs-on: psl-app-vm3
     environment: 
