@@ -17,7 +17,7 @@ jobs:
       - name: Setup .NET Core ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 5.0.0
+          dotnet-version: 5.0.x
 
       - name: Build with dotnet ⚒️⚒️
         run: dotnet build --configuration Release .\evat-workflow
@@ -68,6 +68,15 @@ jobs:
       name: Development
       url: 'http://dev.myapp.com'
     steps:
+      - name: Create a offline file
+        run: echo "" > app_offline.htm    
+      - uses: ChristopheLav/iis-deploy@v1
+        with:
+          website-name: 'evat-workflow'
+          msdeploy-service-url: '192.168.0.68'
+          msdeploy-username: 'installmanager'
+          msdeploy-password: 'install@bj2013'
+          source-path: '${{ github.workspace }}'
       - name: Deploy
         run: echo I am deploying! 
     
