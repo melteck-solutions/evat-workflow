@@ -60,7 +60,7 @@ jobs:
     uses: vbem/reusable/.github/workflows/superlinter.yml@v1
     
   DeployDev:
-    name: Deploy to IIS Dev ( PSL-APP-VM3 )
+    name: Deploy to IIS Dev (APP-VM3)
     if: github.event_name != 'pull_request'
     needs: [Linter]
     runs-on: psl-app-vm3
@@ -71,10 +71,10 @@ jobs:
       - name: Deploy
         run: echo I am deploying! 
     
-  DeployStaging:
-    name: Deploy to IIS Staging 
+  DeployStaging1:
+    name: Deploy to IIS Staging (QA-1)
     if: github.event.ref == 'refs/heads/master'
-    needs: [Linter,DeployDev]
+    needs: [DeployDev]
     runs-on: psl-app-vm3
     environment: 
       name: Staging
@@ -82,10 +82,22 @@ jobs:
     steps:
       - name: Deploy
         run: echo I am deploying! 
-            
+        
+  DeployStaging2:
+    name: Deploy to IIS Staging (QA-2)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [DeployDev]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'http://test.myapp.com'
+    steps:
+      - name: Deploy
+        run: echo I am deploying! 
+        
   DeployProd:
     name: Deploy to IIS Production 
-    needs: [Linter, DeployStaging]
+    needs: [DeployStaging2]
     runs-on: psl-app-vm3
     environment: 
       name: Production
