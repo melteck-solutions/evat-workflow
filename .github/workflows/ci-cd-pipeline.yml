@@ -13,6 +13,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Cache dotnet
+        id: cache-dotnet
+        uses: actions/cache@v3
+        with:
+          path: .\.dotnet
+          key: ${{ runner.os }}-dotnet-6
+          restore-keys: ${{ runner.os }}-dotnet-6
+          
       # setup dotnet
       - name: Setup .NET Core ⚙️⚙️
         uses: actions/setup-dotnet@v3
