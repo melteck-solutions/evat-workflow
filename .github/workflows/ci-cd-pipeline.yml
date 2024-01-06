@@ -8,17 +8,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  Build:
+  build:
     runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
-      - name: Compile
-        run: echo Hello, world!
+
+      - name: Cache dotnet
+        id: cache-dotnet
+        uses: actions/cache@v3
+        with:
+          path: .\.dotnet
+          key: ${{ runner.os }}-dotnet-6
+          restore-keys: ${{ runner.os }}-dotnet-6
+          
+      # setup dotnet
+      - name: Setup .NET Core ⚙️⚙️
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install dependencies ⛑️⛑️
+        run: dotnet restore
+      
+      - name: Build with dotnet ⚒️⚒️
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload Artifact to local folder ⤴️⤴️ 
+        run: |
+          dotnet publish --configuration Release --no-restore --output ./publish
         
+  test:
+    needs: build
+    runs-on: psl-app-vm3
+    steps:
+    - name: Running a Unit Test 🔍🔎
+      run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
+      
   AutoMerge:
     name: Merge pull request
     runs-on: psl-app-vm3
-    needs: [Build]
+    needs: [build]
     if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
     steps:
         - name: Merge
@@ -32,8 +61,8 @@ jobs:
             })
            github-token: ${{ github.token }}
 
-  Linter:
-    needs: [Build]
+  linter:
+    needs: [build]
     permissions:
       contents: read
       packages: read
@@ -41,9 +70,9 @@ jobs:
     uses: vbem/reusable/.github/workflows/superlinter.yml@v1
     
   DeployDev:
-    name: Deploy to Dev 
+    name: Deploy to IIS Dev (APP-VM3)
     if: github.event_name != 'pull_request'
-    needs: [Linter]
+    needs: [linter]
     runs-on: psl-app-vm3
     environment: 
       name: Development
@@ -52,10 +81,10 @@ jobs:
       - name: Deploy
         run: echo I am deploying! 
     
-  DeployStaging:
-    name: Deploy to Staging 
+  DeployStaging1:
+    name: Deploy to IIS Staging (QA-1)
     if: github.event.ref == 'refs/heads/master'
-    needs: [Linter]
+    needs: [DeployDev]
     runs-on: psl-app-vm3
     environment: 
       name: Staging
@@ -63,10 +92,22 @@ jobs:
     steps:
       - name: Deploy
         run: echo I am deploying! 
-            
+        
+  DeployStaging2:
+    name: Deploy to IIS Staging (QA-2)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [DeployDev]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'http://test.myapp.com'
+    steps:
+      - name: Deploy
+        run: echo I am deploying! 
+        
   DeployProd:
-    name: Deploy to Production 
-    needs: [DeployStaging]
+    name: Deploy to IIS Production 
+    needs: [DeployStaging1, DeployStaging2]
     runs-on: psl-app-vm3
     environment: 
       name: Production
