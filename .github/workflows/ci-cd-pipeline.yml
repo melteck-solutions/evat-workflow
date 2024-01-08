@@ -5,6 +5,7 @@ on:
   #  branches: [ master ]
   #pull_request:
   #  branches: [ master ]
+  #  paths-ignore: [".vscode/**", "README.md", ".*"]
   workflow_dispatch:
 
 jobs:
@@ -35,7 +36,7 @@ jobs:
 
       - name: Upload Artifact to local folder ⤴️⤴️ 
         run: |
-          dotnet publish --configuration Release --no-restore --output ./publish
+          dotnet publish evat-workflow/evat-workflow.csproj --configuration Release --framework net5.0 --output ./publish --runtime win-x86 --self-contained true -p:PublishTrimmed=false -p:PublishSingleFile=false
         
   test:
     needs: build
@@ -79,8 +80,13 @@ jobs:
       url: 'http://dev.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
-    
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+
   DeployStaging1:
     name: Deploy to IIS Staging (QA-1)
     if: github.event.ref == 'refs/heads/master'
@@ -91,7 +97,12 @@ jobs:
       url: 'http://test.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
         
   DeployStaging2:
     name: Deploy to IIS Staging (QA-2)
@@ -103,7 +114,12 @@ jobs:
       url: 'http://test.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
         
   DeployProd:
     name: Deploy to IIS Production 
@@ -114,4 +130,9 @@ jobs:
       url: 'http://www.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
