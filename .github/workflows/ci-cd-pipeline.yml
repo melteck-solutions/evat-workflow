@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  Build:
     runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
@@ -38,42 +38,42 @@ jobs:
         run: |
           dotnet publish evat-workflow/evat-workflow.csproj --configuration Release --framework net5.0 --output ./publish --runtime win-x86 --self-contained true -p:PublishTrimmed=false -p:PublishSingleFile=false
         
-  test:
-    needs: build
-    runs-on: psl-app-vm3
-    steps:
-    - name: Running a Unit Test 🔍🔎
-      run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
+  #test:
+  #  needs: Build
+  #  runs-on: psl-app-vm3
+  #  steps:
+  #  - name: Running a Unit Test 🔍🔎
+  #    run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
       
-  AutoMerge:
-    name: Merge pull request
-    runs-on: psl-app-vm3
-    needs: [build]
-    if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
-    steps:
-        - name: Merge
-          uses: actions/github-script@0.2.0
-          with:
-           script: |
-            github.pullRequests.merge({
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                pull_number: context.payload.pull_request.number
-            })
-           github-token: ${{ github.token }}
+  #AutoMerge:
+  #  name: Merge pull request
+  #  runs-on: psl-app-vm3
+  #  needs: [Build]
+  #  if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
+  #  steps:
+  #      - name: Merge
+  #        uses: actions/github-script@0.2.0
+  #        with:
+  #         script: |
+  #          github.pullRequests.merge({
+  #              owner: context.payload.repository.owner.login,
+  #              repo: context.payload.repository.name,
+  #              pull_number: context.payload.pull_request.number
+  #          })
+  #         github-token: ${{ github.token }}
 
-  linter:
-    needs: [build]
-    permissions:
-      contents: read
-      packages: read
-      statuses: write
-    uses: vbem/reusable/.github/workflows/superlinter.yml@v1
+  #linter:
+  #  needs: [Build]
+  #  permissions:
+  #    contents: read
+  #    packages: read
+  #    statuses: write
+  #  uses: vbem/reusable/.github/workflows/superlinter.yml@v1
     
   DeployDev:
     name: Deploy to IIS Dev (APP-VM3)
     if: github.event_name != 'pull_request'
-    needs: [linter]
+    needs: [Build]
     runs-on: psl-app-vm3
     environment: 
       name: Development
@@ -90,7 +90,7 @@ jobs:
   DeployStaging1:
     name: Deploy to IIS Staging (QA-1)
     if: github.event.ref == 'refs/heads/master'
-    needs: [DeployDev]
+    needs: [Build]
     runs-on: psl-app-vm3
     environment: 
       name: Staging
