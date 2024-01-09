@@ -11,99 +11,119 @@ on:
 jobs:
   Build:
     runs-on: psl-app-vm3
-    env: 
-    # set apppool and site name from IIS
-      AppPoolName : DefaultAppPool
-      SiteName  : 'Default Web Site'
-      SitePublishName  :  'DefaultWebSite'
-      
-    # set to site files.  In this case, the part of the path after f:/websites/
-      SitePath :  MainWebsite
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Build
-      run: dotnet build --configuration Release .
-    - name: dotnet publish 
-      run: | 
-        dotnet publish -c Release -o ${{env.SitePublishName}}Publish .
-     
-    - name: Look for app_offline add as needed
-      run: |
-        try{Get-Item F:/Websites/${{env.SitePath}}/app_offline.htm}
-        catch{
-          Copy-Item F:/Websites/Offline/app_offline.htm F:/Websites/${{env.SitePath}} -Recurse -Force  
-          }
-        
-    - name: Sleep for 5 seconds
-      run: Start-Sleep -s 5 
-    
-    - name: Copy Files
-      run: |
-        $currentRetry = 1;
-        $backupRetry = 1;
-        $success = $false;
-        $backupSuccess = $false;
-        do{
-          echo "Attempting file copy $currentRetry"  
-          try {
-            Copy-Item ./${{env.SitePublishName}}Publish/* 'F:/Websites/${{env.SitePath}}' -Recurse -Force
-            $success = $true;
-          }
-          catch {
-            echo "Copy Failed due to following Catch error:`n"
-            echo $PSItem.Exception.Message
-            echo "`n"
-            Start-Sleep -s 2
-            $currentRetry = $currentRetry + 1;
-          }
-          finally {
-            if ($currentRetry -ge 10) {
-                echo "Copy keeps failing; restarting AppPool/Site as last resort`n"
-                echo "Attempting to restart AppPool`n"
-                do{
-                    $status = Get-WebAppPoolState -name '${{env.AppPoolName}}'
-                    if ($status.Value -eq "Stopped") {
-                        start-WebAppPool ${{env.AppPoolName}}
-                        echo "AppPool restarted`n---------`n"
-                        $backupSuccess = $true;
-                    }
-                    else {
-                        if ($backupRetry -ge 10) {
-                           throw "AppPool restart keeps failing. Please look into Malfurion"
-                        }
-                        echo "AppPool not stopped yet; Re-attempt #$backupRetry"
-                        Start-Sleep -s 3
-                        $backupRetry = $backupRetry + 1;
-                    }
-                }
-                while (!$backupSuccess -and $backupRetry -le 10)
-                $backupRetry = 1;
-                $backupSuccess = $false;
-                echo "Attempting to restart Website`n"
-                do{
-                    $status = Get-WebsiteState -name '${{env.SiteName}}'
-                    if ($status.Value -eq "Stopped") {
-                        start-iissite ${{env.SiteName}}
-                        echo "Website restarted`n---------`n"
-                        $backupSuccess = $true;
-                    }
-                    else {
-                        if ($backupRetry -ge 10) {
-                           throw "Website restart keeps failing. Please look into Server"
-                        }
-                        echo "Website not stopped yet; Re-attempt #$backupRetry"
-                        Start-Sleep -s 3
-                        $backupRetry = $backupRetry + 1;
-                    }
-                }
-                while (!$backupSuccess -and $backupRetry -le 10)
-            }
-          }
-        }
-        while (!$success -and $currentRetry -le 10) 
+      - uses: actions/checkout@v3
       
-    - name: Remove Offline
-      if: always()
-      run: |
-        Remove-Item F:/Websites/${{env.SitePath}}/app_offline.htm -Force
+      - name: Setup .NET Core ⚙️⚙️
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install dependencies ⛑️⛑️
+        run: dotnet restore
+      
+      - name: Build with dotnet ⚒️⚒️
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload Artifact to local folder ⤴️⤴️ 
+        run: |
+          dotnet publish evat-workflow/evat-workflow.csproj --configuration Release --framework net6.0 --output ./publish --runtime win-x86 --self-contained false -p:PublishTrimmed=false -p:PublishSingleFile=false
+        
+  #test:
+  #  needs: Build
+  #  runs-on: psl-app-vm3
+  #  steps:
+  #  - name: Running a Unit Test 🔍🔎
+  #    run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
+      
+  #AutoMerge:
+  #  name: Merge pull request
+  #  runs-on: psl-app-vm3
+  #  needs: [Build]
+  #  if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
+  #  steps:
+  #      - name: Merge
+  #        uses: actions/github-script@0.2.0
+  #        with:
+  #         script: |
+  #          github.pullRequests.merge({
+  #              owner: context.payload.repository.owner.login,
+  #              repo: context.payload.repository.name,
+  #              pull_number: context.payload.pull_request.number
+  #          })
+  #         github-token: ${{ github.token }}
+
+  #linter:
+  #  needs: [Build]
+  #  permissions:
+  #    contents: read
+  #    packages: read
+  #    statuses: write
+  #  uses: vbem/reusable/.github/workflows/superlinter.yml@v1
+    
+  DeployDev:
+    name: Deploy to IIS Dev (APP-VM3)
+    if: github.event_name != 'pull_request'
+    needs: [Build]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Development
+      url: 'http://dev.myapp.com'
+    steps:
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+
+  DeployStaging1:
+    name: Deploy to IIS Staging (QA-1)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [Build]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'http://test.myapp.com'
+    steps:
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+        
+  DeployStaging2:
+    name: Deploy to IIS Staging (QA-2)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [DeployDev]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'http://test.myapp.com'
+    steps:
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+        
+  DeployProd:
+    name: Deploy to IIS Production 
+    needs: [DeployStaging1, DeployStaging2]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Production
+      url: 'http://www.myapp.com'
+    steps:
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
