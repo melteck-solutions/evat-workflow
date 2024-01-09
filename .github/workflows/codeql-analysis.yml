@@ -6,16 +6,17 @@
 name: "Code scanning"
 
 on:
-  workflow_dispatch:
   #push:
   #  branches: [ master ]
   #pull_request:
   #  branches: [ master ]
+  workflow_dispatch:
+
 
 jobs:
   analyze:
     name: Analyze code
-    runs-on: psl-app-vm3
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read

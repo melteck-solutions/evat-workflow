@@ -5,6 +5,7 @@ on:
   #  branches: [ master ]
   #pull_request:
   #  branches: [ master ]
+  #  paths-ignore: [".vscode/**", "README.md", ".*"]
   workflow_dispatch:
 
 jobs:
@@ -12,65 +13,126 @@ jobs:
     runs-on: psl-app-vm3
     steps:
       - uses: actions/checkout@v3
-      - name: Compile
-        run: echo Hello, world!
-        
-  AutoMerge:
-    name: Merge pull request
-    runs-on: psl-app-vm3
-    needs: [Build]
-    if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
-    steps:
-        - name: Merge
-          uses: actions/github-script@0.2.0
-          with:
-           script: |
-            github.pullRequests.merge({
-                owner: context.payload.repository.owner.login,
-                repo: context.payload.repository.name,
-                pull_number: context.payload.pull_request.number
-            })
-           github-token: ${{ github.token }}
 
-  Linter:
-    needs: [Build]
-    permissions:
-      contents: read
-      packages: read
-      statuses: write
-    uses: vbem/reusable/.github/workflows/superlinter.yml@v1
+      - name: Cache dotnet
+        id: cache-dotnet
+        uses: actions/cache@v3
+        with:
+          path: .\.dotnet
+          key: ${{ runner.os }}-dotnet-6
+          restore-keys: ${{ runner.os }}-dotnet-6
+          
+      # setup dotnet
+      - name: Setup .NET Core ⚙️⚙️
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Install dependencies ⛑️⛑️
+        run: dotnet restore
+      
+      - name: Build with dotnet ⚒️⚒️
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload Artifact to local folder ⤴️⤴️ 
+        run: |
+          dotnet publish evat-workflow/evat-workflow.csproj --configuration Release --framework net6.0 --output ./publish --runtime win-x86 --self-contained true -p:PublishTrimmed=false -p:PublishSingleFile=false
+        
+  #test:
+  #  needs: Build
+  #  runs-on: psl-app-vm3
+  #  steps:
+  #  - name: Running a Unit Test 🔍🔎
+  #    run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
+      
+  #AutoMerge:
+  #  name: Merge pull request
+  #  runs-on: psl-app-vm3
+  #  needs: [Build]
+  #  if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
+  #  steps:
+  #      - name: Merge
+  #        uses: actions/github-script@0.2.0
+  #        with:
+  #         script: |
+  #          github.pullRequests.merge({
+  #              owner: context.payload.repository.owner.login,
+  #              repo: context.payload.repository.name,
+  #              pull_number: context.payload.pull_request.number
+  #          })
+  #         github-token: ${{ github.token }}
+
+  #linter:
+  #  needs: [Build]
+  #  permissions:
+  #    contents: read
+  #    packages: read
+  #    statuses: write
+  #  uses: vbem/reusable/.github/workflows/superlinter.yml@v1
     
   DeployDev:
-    name: Deploy to Dev 
+    name: Deploy to IIS Dev (APP-VM3)
     if: github.event_name != 'pull_request'
-    needs: [Linter]
+    needs: [Build]
     runs-on: psl-app-vm3
     environment: 
       name: Development
       url: 'http://dev.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
-    
-  DeployStaging:
-    name: Deploy to Staging 
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+
+  DeployStaging1:
+    name: Deploy to IIS Staging (QA-1)
     if: github.event.ref == 'refs/heads/master'
-    needs: [Linter]
+    needs: [Build]
     runs-on: psl-app-vm3
     environment: 
       name: Staging
       url: 'http://test.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
-            
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+        
+  DeployStaging2:
+    name: Deploy to IIS Staging (QA-2)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [DeployDev]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'http://test.myapp.com'
+    steps:
+      - name: Deploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+        
   DeployProd:
-    name: Deploy to Production 
-    needs: [DeployStaging]
+    name: Deploy to IIS Production 
+    needs: [DeployStaging1, DeployStaging2]
     runs-on: psl-app-vm3
     environment: 
       name: Production
       url: 'http://www.myapp.com'
     steps:
       - name: Deploy
-        run: echo I am deploying! 
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
