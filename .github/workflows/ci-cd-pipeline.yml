@@ -71,59 +71,65 @@ jobs:
       url: 'http://dev.myapp.com'
     steps:
       - name: Deploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+        uses: jahbenjah/SmarterASP.NET-web-deploy@1.0.0
         with:
+          # website-name: ${{ secrets.WEBSITE_NAME }}
+          # server-computer-name: ${{ secrets.SERVER_NAME }}
+          # server-username: ${{ secrets.SERVER_USERNAME }}
+          # server-password: ${{ secrets.SERVER_PASSWORD }}
           website-name: ${{ secrets.WEBSITE_NAME }}
           server-computer-name: ${{ secrets.SERVER_NAME }}
           server-username: ${{ secrets.SERVER_USERNAME }}
           server-password: ${{ secrets.SERVER_PASSWORD }}
+          source-path: '\publish\'
+          target-path: '/evat-workflow/'
 
-  DeployStaging1:
-    name: Deploy to IIS Staging (QA-1)
-    if: github.event.ref == 'refs/heads/master'
-    needs: [Build]
-    runs-on: psl-app-vm3
-    environment: 
-      name: Staging
-      url: 'http://test.myapp.com'
-    steps:
-      - name: Deploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-        with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
+  # DeployStaging1:
+  #   name: Deploy to IIS Staging (QA-1)
+  #   if: github.event.ref == 'refs/heads/master'
+  #   needs: [Build]
+  #   runs-on: psl-app-vm3
+  #   environment: 
+  #     name: Staging
+  #     url: 'http://test.myapp.com'
+  #   steps:
+  #     - name: Deploy
+  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+  #       with:
+  #         website-name: ${{ secrets.WEBSITE_NAME }}
+  #         server-computer-name: ${{ secrets.SERVER_NAME }}
+  #         server-username: ${{ secrets.SERVER_USERNAME }}
+  #         server-password: ${{ secrets.SERVER_PASSWORD }}
         
-  DeployStaging2:
-    name: Deploy to IIS Staging (QA-2)
-    if: github.event.ref == 'refs/heads/master'
-    needs: [DeployDev]
-    runs-on: psl-app-vm3
-    environment: 
-      name: Staging
-      url: 'http://test.myapp.com'
-    steps:
-      - name: Deploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-        with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
+  # DeployStaging2:
+  #   name: Deploy to IIS Staging (QA-2)
+  #   if: github.event.ref == 'refs/heads/master'
+  #   needs: [DeployDev]
+  #   runs-on: psl-app-vm3
+  #   environment: 
+  #     name: Staging
+  #     url: 'http://test.myapp.com'
+  #   steps:
+  #     - name: Deploy
+  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+  #       with:
+  #         website-name: ${{ secrets.WEBSITE_NAME }}
+  #         server-computer-name: ${{ secrets.SERVER_NAME }}
+  #         server-username: ${{ secrets.SERVER_USERNAME }}
+  #         server-password: ${{ secrets.SERVER_PASSWORD }}
         
-  DeployProd:
-    name: Deploy to IIS Production 
-    needs: [DeployStaging1, DeployStaging2]
-    runs-on: psl-app-vm3
-    environment: 
-      name: Production
-      url: 'http://www.myapp.com'
-    steps:
-      - name: Deploy
-        uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-        with:
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
+  # DeployProd:
+  #   name: Deploy to IIS Production 
+  #   needs: [DeployStaging1, DeployStaging2]
+  #   runs-on: psl-app-vm3
+  #   environment: 
+  #     name: Production
+  #     url: 'http://www.myapp.com'
+  #   steps:
+  #     - name: Deploy
+  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
+  #       with:
+  #         website-name: ${{ secrets.WEBSITE_NAME }}
+  #         server-computer-name: ${{ secrets.SERVER_NAME }}
+  #         server-username: ${{ secrets.SERVER_USERNAME }}
+  #         server-password: ${{ secrets.SERVER_PASSWORD }}
