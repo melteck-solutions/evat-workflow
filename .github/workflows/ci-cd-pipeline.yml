@@ -8,6 +8,11 @@ on:
   #  paths-ignore: [".vscode/**", "README.md", ".*"]
   workflow_dispatch:
 
+env:
+  GITHUB_WORKING_DIRECTORY: ''
+  IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'      
+  DOTNET_VERSION: '6.0.x'
+ 
 jobs:
   Build:
     runs-on: psl-app-vm3
@@ -17,18 +22,26 @@ jobs:
       - name: Setup .NET Core ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install dependencies ⛑️⛑️
+        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
         run: dotnet restore
       
       - name: Build with dotnet ⚒️⚒️
-        run: dotnet build --configuration Release --no-restore
+        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
+        run: dotnet build --configuration Release --no-restore 
 
-      - name: Upload Artifact to local folder ⤴️⤴️ 
-        run: |
-          dotnet publish evat-workflow/evat-workflow.csproj --configuration Release --framework net6.0 --output ./publish --runtime win-x86 --self-contained false -p:PublishTrimmed=false -p:PublishSingleFile=false
+      - name: Publish 🦍🦍
+        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
+        run: dotnet publish --configuration Release --output 'evat-workflow-published'
         
+      - name: Upload a Build Artifact ⤴️⤴️ 
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: application
+          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/evat-workflow-published'
+
   #test:
   #  needs: Build
   #  runs-on: psl-app-vm3
@@ -68,21 +81,22 @@ jobs:
     runs-on: psl-app-vm3
     environment: 
       name: Development
-      url: 'http://dev.myapp.com'
+      url: 'http://psl-app-vm3/evat-workflow-api/swagger'
     steps:
-      - name: Deploy
-        uses: jahbenjah/SmarterASP.NET-web-deploy@1.0.0
+      - name: Take application offline
+        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
+        
+      - name: Set Offline HTML file
+        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v2
         with:
-          # website-name: ${{ secrets.WEBSITE_NAME }}
-          # server-computer-name: ${{ secrets.SERVER_NAME }}
-          # server-username: ${{ secrets.SERVER_USERNAME }}
-          # server-password: ${{ secrets.SERVER_PASSWORD }}
-          website-name: ${{ secrets.WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SERVER_NAME }}
-          server-username: ${{ secrets.SERVER_USERNAME }}
-          server-password: ${{ secrets.SERVER_PASSWORD }}
-          source-path: '\publish\'
-          target-path: '/evat-workflow/'
+          name: application
+          path: ${{ env.IIS_WEBAPP_PATH }}
+  
+      - name: Bring the app back online
+        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
 
   # DeployStaging1:
   #   name: Deploy to IIS Staging (QA-1)
