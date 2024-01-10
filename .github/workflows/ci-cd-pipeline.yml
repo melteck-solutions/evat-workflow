@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
+          path: './publish'
 
   #test:
   #  needs: Build
@@ -81,7 +81,7 @@ jobs:
     runs-on: psl-app-vm3
     environment: 
       name: Development
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      url: https://psl-app-vm3/evat-workflow-api/swagger
     steps:
       - name: Take application offline
         run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
