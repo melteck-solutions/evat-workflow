@@ -113,7 +113,7 @@ jobs:
     name: Deploy to IIS Staging (QA)
     if: github.event.ref == 'refs/heads/master'
     needs: [DeployTest]
-    runs-on: psl-app-vm3
+    runs-on: persolqa-com
     environment: 
       name: Staging
       url: 'https://evat-workflow-api.persolqa.com/swagger'
