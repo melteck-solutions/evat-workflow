@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  GITHUB_WORKING_DIRECTORY: ''
+  GITHUB_WORKING_DIRECTORY: './'
   IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'      
   DOTNET_VERSION: '6.0.x'
  
@@ -34,13 +34,13 @@ jobs:
 
       - name: Publish 🦍🦍
         working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet publish --configuration Release --output 'evat-workflow-build'
+        run: dotnet publish --configuration Release --output 'publish'
         
       - name: Upload a Build Artifact ⤴️⤴️ 
         uses: actions/upload-artifact@v2.2.1
         with:
           name: application
-          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/evat-workflow-build'
+          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
 
   #test:
   #  needs: Build
