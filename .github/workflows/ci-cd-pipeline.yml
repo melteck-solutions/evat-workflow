@@ -41,25 +41,6 @@ jobs:
         with:
           name: .net-app
           path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-  
-  #AutoMerge:
-  #  name: Merge pull request
-  #  runs-on: psl-app-vm3
-  #  needs: [Build]
-  #  if: github.base_ref == 'master' && github.actor == 'dependabot[bot]'
-  #  steps:
-  #      - name: Merge
-  #        uses: actions/github-script@0.2.0
-  #        with:
-  #         script: |
-  #          github.pullRequests.merge({
-  #              owner: context.payload.repository.owner.login,
-  #              repo: context.payload.repository.name,
-  #              pull_number: context.payload.pull_request.number
-  #          })
-  #         github-token: ${{ github.token }}
-
-
     
   DeployDev:
     name: Deploy to IIS Dev (APP-APP-VM3)
