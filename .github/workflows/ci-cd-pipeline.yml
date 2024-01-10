@@ -34,13 +34,13 @@ jobs:
 
       - name: Publish 🦍🦍
         working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet publish --configuration Release --output 'evat-workflow-published'
+        run: dotnet publish --configuration Release --output 'evat-workflow-build'
         
       - name: Upload a Build Artifact ⤴️⤴️ 
         uses: actions/upload-artifact@v2.2.1
         with:
           name: application
-          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/evat-workflow-published'
+          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/evat-workflow-build'
 
   #test:
   #  needs: Build
