@@ -63,7 +63,7 @@ jobs:
     
   DeployDev:
     name: Deploy to IIS Dev (APP-APP-VM3)
-    if: github.event_name != 'pull_request'
+    if: github.event_name == 'pull_request'
     needs: [Build]
     runs-on: psl-app-vm3
     environment: 
@@ -111,7 +111,6 @@ jobs:
         
   DeployStaging:
     name: Deploy to IIS Staging (QA)
-    if: github.event.ref == 'refs/heads/master'
     needs: [DeployTest]
     runs-on: persolqa-com
     environment: 
