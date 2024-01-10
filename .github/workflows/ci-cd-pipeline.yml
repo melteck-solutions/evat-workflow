@@ -34,7 +34,7 @@ jobs:
 
       - name: Publish 🦍🦍
         working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet publish --configuration Release --property:PublishDir='${{ env.GITHUB_WORKING_DIRECTORY }}publish'
+        run: dotnet publish --configuration Release --property:PublishDir='${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
         
       - name: Upload a Build Artifact ⤴️⤴️ 
         uses: actions/upload-artifact@v4
