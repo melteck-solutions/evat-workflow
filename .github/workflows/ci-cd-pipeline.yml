@@ -41,14 +41,7 @@ jobs:
         with:
           name: .net-app
           path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-
-  #test:
-  #  needs: Build
-  #  runs-on: psl-app-vm3
-  #  steps:
-  #  - name: Running a Unit Test 🔍🔎
-  #    run: echo running a test on build # dotnet test src\AspNetCoreAPI-GitHubAction.Test
-      
+  
   #AutoMerge:
   #  name: Merge pull request
   #  runs-on: psl-app-vm3
@@ -66,13 +59,7 @@ jobs:
   #          })
   #         github-token: ${{ github.token }}
 
-  #linter:
-  #  needs: [Build]
-  #  permissions:
-  #    contents: read
-  #    packages: read
-  #    statuses: write
-  #  uses: vbem/reusable/.github/workflows/superlinter.yml@v1
+
     
   DeployDev:
     name: Deploy to IIS Dev (APP-VM3)
@@ -98,52 +85,49 @@ jobs:
       - name: Bring the app back online
         run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
 
-  # DeployStaging1:
-  #   name: Deploy to IIS Staging (QA-1)
-  #   if: github.event.ref == 'refs/heads/master'
-  #   needs: [Build]
-  #   runs-on: psl-app-vm3
-  #   environment: 
-  #     name: Staging
-  #     url: 'http://test.myapp.com'
-  #   steps:
-  #     - name: Deploy
-  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-  #       with:
-  #         website-name: ${{ secrets.WEBSITE_NAME }}
-  #         server-computer-name: ${{ secrets.SERVER_NAME }}
-  #         server-username: ${{ secrets.SERVER_USERNAME }}
-  #         server-password: ${{ secrets.SERVER_PASSWORD }}
+  DeployStaging:
+    name: Deploy to IIS Staging (QA)
+    if: github.event.ref == 'refs/heads/master'
+    needs: [Build]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Staging
+      url: 'https://evat-workflow-api.persolqa.com/swagger'
+    steps:
+      - name: Take application offline
+        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
         
-  # DeployStaging2:
-  #   name: Deploy to IIS Staging (QA-2)
-  #   if: github.event.ref == 'refs/heads/master'
-  #   needs: [DeployDev]
-  #   runs-on: psl-app-vm3
-  #   environment: 
-  #     name: Staging
-  #     url: 'http://test.myapp.com'
-  #   steps:
-  #     - name: Deploy
-  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-  #       with:
-  #         website-name: ${{ secrets.WEBSITE_NAME }}
-  #         server-computer-name: ${{ secrets.SERVER_NAME }}
-  #         server-username: ${{ secrets.SERVER_USERNAME }}
-  #         server-password: ${{ secrets.SERVER_PASSWORD }}
+      - name: Set Offline HTML file
+        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ${{ env.IIS_WEBAPP_PATH }}
+  
+      - name: Bring the app back online
+        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
+
+  DeployProd:
+    name: Deploy to IIS Production 
+    needs: [DeployStaging]
+    runs-on: psl-app-vm3
+    environment: 
+      name: Production
+      url: 'http://www.myapp.com'
+    steps:
+      - name: Take application offline
+        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
         
-  # DeployProd:
-  #   name: Deploy to IIS Production 
-  #   needs: [DeployStaging1, DeployStaging2]
-  #   runs-on: psl-app-vm3
-  #   environment: 
-  #     name: Production
-  #     url: 'http://www.myapp.com'
-  #   steps:
-  #     - name: Deploy
-  #       uses: rasmusbuchholdt/simply-web-deploy@2.1.0 
-  #       with:
-  #         website-name: ${{ secrets.WEBSITE_NAME }}
-  #         server-computer-name: ${{ secrets.SERVER_NAME }}
-  #         server-username: ${{ secrets.SERVER_USERNAME }}
-  #         server-password: ${{ secrets.SERVER_PASSWORD }}
+      - name: Set Offline HTML file
+        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+          path: ${{ env.IIS_WEBAPP_PATH }}
+  
+      - name: Bring the app back online
+        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
