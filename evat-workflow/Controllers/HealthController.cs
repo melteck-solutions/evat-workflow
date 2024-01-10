@@ -4,23 +4,23 @@ namespace evat_workflow.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class HealthController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<HealthController> _logger;
 
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public HealthController(ILogger<HealthController> logger)
         {
             _logger = logger;
         }
 
 
-        [HttpGet(Name = "GetWeatherForecast")]
+        [HttpGet(Name = "all")]
         public IEnumerable<WeatherForecast> Get()
         {
             return Enumerable
