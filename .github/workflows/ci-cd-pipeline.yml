@@ -32,7 +32,7 @@ jobs:
         working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
         run: dotnet build --configuration Release --no-restore 
 
-      - name: Publish 🦍🦍
+      - name: Publish Build Artifact🦍🦍
         working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
         run: dotnet publish --configuration Release --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
         
