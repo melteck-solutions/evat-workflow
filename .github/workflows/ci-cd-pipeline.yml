@@ -89,7 +89,7 @@ jobs:
     name: Deploy to IIS Dev (PSL-WEBAPPS-VM3)
     if: github.event.ref == 'refs/heads/master'
     needs: [Build]
-    runs-on: psl-app-vm3
+    runs-on: psl-webapps-vm3
     environment: 
       name: Development
       url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
