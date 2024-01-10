@@ -1,11 +1,11 @@
 name: CI CD Pipeline
 
 on:
-  #push:
-  #  branches: [ master ]
-  #pull_request:
-  #  branches: [ master ]
-  #  paths-ignore: [".vscode/**", "README.md", ".*"]
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+    paths-ignore: [".vscode/**", "README.md", ".*"]
   workflow_dispatch:
 
 env:
