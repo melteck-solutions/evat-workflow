@@ -158,6 +158,7 @@ jobs:
 
   DeployProdTest:
     name: Deploy to IIS Production (HCMCLOUD.COM) 
+    if: github.event.ref == 'refs/heads/master'
     needs: [DeployStaging]
     runs-on: psl-app-vm3
     environment: 
