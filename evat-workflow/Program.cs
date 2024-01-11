@@ -3,12 +3,13 @@ using evat_workflow.Helpers;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-    .AddEnvironmentVariables()
-    .Build();
+//builder.Configuration
+//    .SetBasePath(Directory.GetCurrentDirectory())
+//    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+//    .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+//    .AddJsonFile($"appsettings.overrides.json", optional: true, reloadOnChange: true)
+//    .AddEnvironmentVariables()
+//    .Build();
 
 
 builder.Configuration.GetSection(nameof(CustomSettings)).Bind(new CustomSettings());
