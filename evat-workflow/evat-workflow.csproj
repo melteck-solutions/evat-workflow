@@ -13,9 +13,11 @@
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
+	<Content Remove="appsettings.json" />
   </ItemGroup>
-	  <ItemGroup Condition=" '$(EnvironmentName)' == 'Development'">
+	<ItemGroup Condition=" '$(EnvironmentName)' == 'Development'">
     <Content Remove="appsettings.appvm3.json" />
+	<Content Remove="appsettings.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.cimsgh.json" />
@@ -25,12 +27,14 @@
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
+	<Content Remove="appsettings.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(**EnvironmentName**)' == 'Production'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
+	<Content Remove="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
