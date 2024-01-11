@@ -1,3 +1,4 @@
+using evat_workflow.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace evat_workflow.Controllers
@@ -6,11 +7,6 @@ namespace evat_workflow.Controllers
     [Route("[controller]")]
     public class HealthController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
         private readonly ILogger<HealthController> _logger;
 
 
@@ -20,18 +16,10 @@ namespace evat_workflow.Controllers
         }
 
 
-        [HttpGet(Name = "all")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet]
+        public async Task<IActionResult> Get()
         {
-            return Enumerable
-                .Range(1, 5)
-                .Select(index => new WeatherForecast
-                {
-                    Date = DateTime.Now.AddDays(index),
-                    TemperatureC = Random.Shared.Next(-20, 55),
-                    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-                })
-                .ToArray();
+            return Ok(await Task.FromResult($"eVAT runing at url : {CustomSettings.Current.AppUrl}"));
         }
     }
 }

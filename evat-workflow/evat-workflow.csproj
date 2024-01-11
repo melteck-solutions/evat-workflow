@@ -6,6 +6,32 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>evat_workflow</RootNamespace>
   </PropertyGroup>
+	
+
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'Testing'">
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.persolqa.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.cimsgh.json" />
+  </ItemGroup>
+	  <ItemGroup Condition=" '$(EnvironmentName)' == 'Development'">
+    <Content Remove="appsettings.appvm3.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.persolqa.json" />
+    <Content Remove="appsettings.cimsgh.json" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'Staging'">
+    <Content Remove="appsettings.appvm3.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.cimsgh.json" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(**EnvironmentName**)' == 'Production'">
+    <Content Remove="appsettings.appvm3.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.persolqa.json" />
+    <Content Remove="appsettings.webappsvm3.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
