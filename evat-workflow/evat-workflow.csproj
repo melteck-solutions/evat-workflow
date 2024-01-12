@@ -9,28 +9,28 @@
   </PropertyGroup>
 	
 
-  <ItemGroup Condition=" '$(EnvironmentName)' == 'Testing'">
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'webappsvm3'">
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
-	<ItemGroup Condition=" '$(EnvironmentName)' == 'Development'">
+	<ItemGroup Condition=" '$(EnvironmentName)' == 'appvm3'">
     <Content Remove="appsettings.appvm3.json" />
 	<Content Remove="appsettings.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.cimsgh.json" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(EnvironmentName)' == 'Staging'">
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'persolqa'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(**EnvironmentName**)' == 'Production'">
+  <ItemGroup Condition=" '$(**EnvironmentName**)' == 'cimsgh'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
