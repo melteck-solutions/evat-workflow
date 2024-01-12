@@ -18,19 +18,16 @@ builder.Configuration.GetSection(nameof(CustomSettings)).Bind(option);
 
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-
-var tt = builder.Configuration["IdpSettings:Authority"]; ;
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
-    options.SaveToken = bool.Parse(builder.Configuration["IdpSettings:SaveToken"]);
-    options.Authority = builder.Configuration["IdpSettings:Authority"];
-    options.RequireHttpsMetadata = bool.Parse(builder.Configuration["IdpSettings:RequireHttpsMetadata"]);
+    options.SaveToken = bool.Parse(option.SaveToken);
+    options.Authority = option.Authority;
+    options.RequireHttpsMetadata = bool.Parse(option.RequireHttpsMetadata);
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
@@ -66,24 +63,24 @@ builder.Services.AddSwaggerGen(c =>
     //var commentsFile = Path.Combine(baseDirectory, commentsFileName);
     //c.IncludeXmlComments(commentsFile);
 
-    //c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    //{
-    //    Type = SecuritySchemeType.OAuth2,
-    //    Flows = new OpenApiOAuthFlows
-    //    {
-    //        AuthorizationCode = new OpenApiOAuthFlow
-    //        {
-    //            AuthorizationUrl = new Uri(builder.Configuration["IdpSettings:AuthorityURL"]),
-    //            TokenUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
-    //            RefreshUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
-    //            Scopes = new Dictionary<string, string>
-    //                        {
-    //                            {"evat_modular_api", "eVAT Workflow Sample - full access"}
-    //                        }
-    //        }
-    //    },
+    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.OAuth2,
+        Flows = new OpenApiOAuthFlows
+        {
+            AuthorizationCode = new OpenApiOAuthFlow
+            {
+                AuthorizationUrl = new Uri(option.AuthorityURL),
+                TokenUrl = new Uri(option.TokenUrl),
+                RefreshUrl = new Uri(option.TokenUrl),
+                Scopes = new Dictionary<string, string>
+                {
+                    {"evat_modular_api", "eVAT Workflow Sample - full access"}
+                }
+            }
+        },
 
-    //});
+    });
 
     c.OperationFilter<EvatFilter>();
 });
@@ -103,8 +100,8 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "eVAT Workflow Sample v1");
-    c.OAuthClientId(builder.Configuration["IdpSettings:ClientId"]);
-    c.OAuthClientSecret(builder.Configuration["IdpSettings:ClientSecret"]);
+    c.OAuthClientId(option.ClientId);
+    c.OAuthClientSecret(option.ClientSecret);
     c.OAuthAppName("eVAT Workflow Sample v1");
     c.OAuthScopeSeparator(" ");
     c.OAuthUsePkce();
@@ -113,10 +110,10 @@ app.UseSwaggerUI(c =>
 #else
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"{option.Folder}/swagger/swagger.json",
+                c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
                     "eVAT Workflow Sample v1");
-                c.OAuthClientId(builder.Configuration["IdpSettings:ClientId"]);
-                c.OAuthClientSecret(builder.Configuration["IdpSettings:ClientSecret"]);
+                c.OAuthClientId(option.ClientId);
+                c.OAuthClientSecret(option.ClientSecret);
                 c.OAuthAppName("eVAT Workflow Sample v1");
                 c.OAuthScopeSeparator(" ");
                 c.OAuthUsePkce();
