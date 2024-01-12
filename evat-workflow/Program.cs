@@ -7,11 +7,11 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration
-       .SetBasePath(builder.Environment.ContentRootPath)
-       .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-       .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
-       .AddEnvironmentVariables().Build();
+//builder.Configuration
+//       .SetBasePath(builder.Environment.ContentRootPath)
+//       .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+//       .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+//       .AddEnvironmentVariables().Build();
 
 
 builder.Configuration.GetSection(nameof(CustomSettings)).Bind(new CustomSettings());
