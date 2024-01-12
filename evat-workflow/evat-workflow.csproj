@@ -2,12 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>evat_workflow</RootNamespace>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
-	
+
 
   <ItemGroup Condition=" '$(EnvironmentName)' == 'webappsvm3'">
     <Content Remove="appsettings.webappsvm3.json" />
@@ -17,15 +16,14 @@
     <Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
-	<ItemGroup Condition=" '$(EnvironmentName)' == 'appvm3'">
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'appvm3'">
     <Content Remove="appsettings.appvm3.json" />
 	<Content Remove="appsettings.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.cimsgh.json" />
 	<Content Remove="appsettings.local.json" />
-
-	</ItemGroup>
+  </ItemGroup>
   <ItemGroup Condition=" '$(EnvironmentName)' == 'persolqa'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
@@ -34,7 +32,7 @@
 	<Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(**EnvironmentName**)' == 'cimsgh'">
+  <ItemGroup Condition=" '$(EnvironmentName)' == 'cimsgh'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
 	<Content Remove="appsettings.local.json" />
