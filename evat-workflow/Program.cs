@@ -63,6 +63,10 @@ builder.Services.AddSwaggerGen(c =>
     //var commentsFile = Path.Combine(baseDirectory, commentsFileName);
     //c.IncludeXmlComments(commentsFile);
 
+    Console.WriteLine(option.TokenUrl);
+    Console.WriteLine(option.AuthorityURL);
+
+
     c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.OAuth2,
