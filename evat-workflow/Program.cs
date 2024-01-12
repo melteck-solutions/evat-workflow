@@ -66,24 +66,24 @@ builder.Services.AddSwaggerGen(c =>
     //var commentsFile = Path.Combine(baseDirectory, commentsFileName);
     //c.IncludeXmlComments(commentsFile);
 
-    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.OAuth2,
-        Flows = new OpenApiOAuthFlows
-        {
-            AuthorizationCode = new OpenApiOAuthFlow
-            {
-                AuthorizationUrl = new Uri(builder.Configuration["IdpSettings:AuthorityURL"]),
-                TokenUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
-                RefreshUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
-                Scopes = new Dictionary<string, string>
-                            {
-                                {"evat_modular_api", "eVAT Workflow Sample - full access"}
-                            }
-            }
-        },
+    //c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    //{
+    //    Type = SecuritySchemeType.OAuth2,
+    //    Flows = new OpenApiOAuthFlows
+    //    {
+    //        AuthorizationCode = new OpenApiOAuthFlow
+    //        {
+    //            AuthorizationUrl = new Uri(builder.Configuration["IdpSettings:AuthorityURL"]),
+    //            TokenUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
+    //            RefreshUrl = new Uri(builder.Configuration["IdpSettings:TokenUrl"]),
+    //            Scopes = new Dictionary<string, string>
+    //                        {
+    //                            {"evat_modular_api", "eVAT Workflow Sample - full access"}
+    //                        }
+    //        }
+    //    },
 
-    });
+    //});
 
     c.OperationFilter<EvatFilter>();
 });
