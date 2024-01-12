@@ -89,7 +89,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
+    c.SwaggerEndpoint($"{option.Folder}/evat-workflow-api/swagger/v1/swagger.json",
         "eVAT Workflow Sample v1");
     c.OAuthClientId(option.ClientId);
     c.OAuthClientSecret(option.ClientSecret);
