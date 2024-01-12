@@ -10,25 +10,17 @@ namespace evat_workflow
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public CustomSettings Option { get; set; }
-
-
 
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Option= new CustomSettings();
         }
 
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddOptions();
 
-            Configuration.Bind(nameof(CustomSettings), Option);
-            services.AddSingleton(Option);
-
-            services.AddSingleton(Configuration);
+            var settings = Configuration.GetRequiredSection(nameof(Settings)).Get<Settings>();
 
 
             services.AddControllers();
@@ -39,9 +31,9 @@ namespace evat_workflow
                 options.DefaultAuthenticateScheme = IdentityServerAuthenticationDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
-                options.SaveToken = bool.Parse(Option.SaveToken);
-                options.Authority = Option.Authority;
-                options.RequireHttpsMetadata = bool.Parse(Option.RequireHttpsMetadata);
+                options.SaveToken = bool.Parse(settings.SaveToken);
+                options.Authority = settings.Authority;
+                options.RequireHttpsMetadata = bool.Parse(settings.RequireHttpsMetadata);
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -84,9 +76,9 @@ namespace evat_workflow
                     {
                         AuthorizationCode = new OpenApiOAuthFlow
                         {
-                            AuthorizationUrl = new Uri(Option.AuthorityURL),
-                            TokenUrl = new Uri(Option.TokenUrl),
-                            RefreshUrl = new Uri(Option.TokenUrl),
+                            AuthorizationUrl = new Uri(settings.AuthorityURL),
+                            TokenUrl = new Uri(settings.TokenUrl),
+                            RefreshUrl = new Uri(settings.TokenUrl),
                             Scopes = new Dictionary<string, string>
                             {
                                 {"evat_modular_api", "eVAT Workflow Sample - full access"}
@@ -101,14 +93,15 @@ namespace evat_workflow
         }
         public void Configure(WebApplication app, IWebHostEnvironment env)
         {
+            var settings = Configuration.GetRequiredSection(nameof(Settings)).Get<Settings>();
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"{Option.Folder}/swagger/v1/swagger.json",
+                c.SwaggerEndpoint($"{settings.Folder}/swagger/v1/swagger.json",
                     "eVAT Workflow Sample v1");
-                c.OAuthClientId(Option.ClientId);
-                c.OAuthClientSecret(Option.ClientSecret);
+                c.OAuthClientId(settings.ClientId);
+                c.OAuthClientSecret(settings.ClientSecret);
                 c.OAuthAppName("eVAT Workflow Sample v1");
                 c.OAuthScopeSeparator(" ");
                 c.OAuthUsePkce();

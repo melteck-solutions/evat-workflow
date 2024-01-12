@@ -3,13 +3,15 @@ using evat_workflow;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var env = builder.Environment;
+var enviroment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 builder.Configuration
-	.SetBasePath(Directory.GetCurrentDirectory())
-	.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-	.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-	.AddEnvironmentVariables();
+    .AddJsonFile("appsettings.json", false, true)
+    .AddJsonFile($"appsettings.{enviroment}.json", true, true)
+    .AddJsonFile($"appsettings.{Environment.MachineName}.json", true, true)
+    .AddEnvironmentVariables()
+    .Build();
+
 
 var startup = new Startup(builder.Configuration);
 startup.ConfigureServices(builder.Services); // calling ConfigureServices method

@@ -1,10 +1,10 @@
 ﻿namespace evat_workflow.Helpers
 {
-    public class CustomSettings
+    public class Settings
     {
-        public static CustomSettings Current;
+        public static Settings Current;
 
-        public CustomSettings()
+        public Settings()
         {
             Current = this;
         }

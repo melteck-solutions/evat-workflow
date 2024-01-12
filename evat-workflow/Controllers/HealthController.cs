@@ -19,7 +19,7 @@ namespace evat_workflow.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Ok(await Task.FromResult($"eVAT runing at url : {CustomSettings.Current.AppUrl}"));
+            return Ok(await Task.FromResult($"eVAT runing at url : {Settings.Current.AppUrl}"));
         }
     }
 }
