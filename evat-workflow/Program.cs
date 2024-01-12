@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 var enviroment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
 builder.Configuration
-    .AddJsonFile("appsettings.json", false, true)
+    .AddJsonFile("appsettings.json", true, true)
     .AddJsonFile($"appsettings.{enviroment}.json", true, true)
     .AddJsonFile($"appsettings.{Environment.MachineName}.json", true, true)
     .AddEnvironmentVariables()
