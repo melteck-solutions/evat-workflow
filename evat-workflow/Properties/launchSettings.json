@@ -9,7 +9,7 @@
     }
   },
   "profiles": {
-    "evat_workflow": {
+    "evat_workflow (local)": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
@@ -18,14 +18,46 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "local"
       }
-    }//,
-    //"IIS Express": {
-    //  "commandName": "IISExpress",
-    //  "launchBrowser": true,
-    //  "launchUrl": "swagger",
-    //  "environmentVariables": {
-    //    "ASPNETCORE_ENVIRONMENT": "Development"
-    //  }
-    //}
+    },
+    "evat_workflow (webappsvm3)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7003;http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "webappsvm3"
+      }
+    },
+    "evat_workflow (persolqa)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7003;http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "persolqa"
+      }
+    },
+    "evat_workflow (cimsgh)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7003;http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "cimsgh"
+      }
+    },
+    "evat_workflow (appvm3)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7003;http://localhost:5003",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "appvm3"
+      }
+    }
   }
 }

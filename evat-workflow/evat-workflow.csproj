@@ -14,6 +14,7 @@
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
+    <Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
 	<ItemGroup Condition=" '$(EnvironmentName)' == 'appvm3'">
@@ -22,18 +23,22 @@
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.cimsgh.json" />
-  </ItemGroup>
+	<Content Remove="appsettings.local.json" />
+
+	</ItemGroup>
   <ItemGroup Condition=" '$(EnvironmentName)' == 'persolqa'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
+	<Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(**EnvironmentName**)' == 'cimsgh'">
     <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
-    <Content Remove="appsettings.persolqa.json" />
+	<Content Remove="appsettings.local.json" />
+	<Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
