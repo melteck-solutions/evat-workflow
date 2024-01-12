@@ -2,7 +2,6 @@ using evat_workflow.Helpers;
 using IdentityServer4.AccessTokenValidation;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -63,67 +62,41 @@ builder.Services.AddSwaggerGen(c =>
     //var commentsFile = Path.Combine(baseDirectory, commentsFileName);
     //c.IncludeXmlComments(commentsFile);
 
-    Console.WriteLine(option.TokenUrl);
-    Console.WriteLine(option.AuthorityURL);
+    //c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+    //{
+    //    Type = SecuritySchemeType.OAuth2,
+    //    Flows = new OpenApiOAuthFlows
+    //    {
+    //        AuthorizationCode = new OpenApiOAuthFlow
+    //        {
+    //            AuthorizationUrl = new Uri(option.AuthorityURL),
+    //            TokenUrl = new Uri(option.TokenUrl),
+    //            RefreshUrl = new Uri(option.TokenUrl),
+    //            Scopes = new Dictionary<string, string>
+    //            {
+    //                {"evat_modular_api", "eVAT Workflow Sample - full access"}
+    //            }
+    //        }
+    //    },
 
-
-    c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.OAuth2,
-        Flows = new OpenApiOAuthFlows
-        {
-            AuthorizationCode = new OpenApiOAuthFlow
-            {
-                AuthorizationUrl = new Uri(option.AuthorityURL),
-                TokenUrl = new Uri(option.TokenUrl),
-                RefreshUrl = new Uri(option.TokenUrl),
-                Scopes = new Dictionary<string, string>
-                {
-                    {"evat_modular_api", "eVAT Workflow Sample - full access"}
-                }
-            }
-        },
-
-    });
+    //});
 
     c.OperationFilter<EvatFilter>();
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
-
 app.UseSwagger();
-
-#if DEBUG
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "eVAT Workflow Sample v1");
+    c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
+        "eVAT Workflow Sample v1");
     c.OAuthClientId(option.ClientId);
     c.OAuthClientSecret(option.ClientSecret);
     c.OAuthAppName("eVAT Workflow Sample v1");
     c.OAuthScopeSeparator(" ");
     c.OAuthUsePkce();
 });
-
-#else
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
-                    "eVAT Workflow Sample v1");
-                c.OAuthClientId(option.ClientId);
-                c.OAuthClientSecret(option.ClientSecret);
-                c.OAuthAppName("eVAT Workflow Sample v1");
-                c.OAuthScopeSeparator(" ");
-                c.OAuthUsePkce();
-            });
-#endif
-
 
 app.UseHttpsRedirection();
 
