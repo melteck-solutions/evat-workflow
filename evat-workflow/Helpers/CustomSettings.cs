@@ -11,5 +11,6 @@
 
 
         public string AppUrl { get; set; }
+        public string Folder { get; set; } 
     }
 }

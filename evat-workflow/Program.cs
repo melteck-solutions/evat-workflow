@@ -13,8 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 //       .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
 //       .AddEnvironmentVariables().Build();
 
-
-builder.Configuration.GetSection(nameof(CustomSettings)).Bind(new CustomSettings());
+var option = new CustomSettings();
+builder.Configuration.GetSection(nameof(CustomSettings)).Bind(option);
 
 
 builder.Services.AddControllers();
@@ -109,10 +109,11 @@ app.UseSwaggerUI(c =>
     c.OAuthScopeSeparator(" ");
     c.OAuthUsePkce();
 });
+
 #else
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"{builder.Configuration["AppSettings:Folder"]}/swagger/v1/swagger.json",
+                c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
                     "eVAT Workflow Sample v1");
                 c.OAuthClientId(builder.Configuration["IdpSettings:ClientId"]);
                 c.OAuthClientSecret(builder.Configuration["IdpSettings:ClientSecret"]);
