@@ -1,12 +1,11 @@
-name: PASH-API-Build-Deployment 
+name: eVAT-API-Build-Deployment 
 on: 
  push:
-    branches: [dev]
-    paths: 
-    - "Pash.Web/**" 
+    branches: [master]
+
 jobs:
  build:
-    runs-on: psl-app-vm3
+    runs-on: psl-webapps-vm3
     strategy:
       matrix:
         node-version: [ 6.0.x ]
@@ -59,7 +58,7 @@ jobs:
         path: ${{github.workspace}}/buildnumberapi.txt
  deploy:
     needs: [build]
-    runs-on: psl-app-vm3
+    runs-on: psl-webapps-vm3
 
     env:
       deploy-powershell-script:  "D:\\github-deploy-ps.ps1"
