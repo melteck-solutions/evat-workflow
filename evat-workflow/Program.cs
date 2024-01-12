@@ -113,7 +113,7 @@ app.UseSwaggerUI(c =>
 #else
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"{option.Folder}/swagger/v1/swagger.json",
+                c.SwaggerEndpoint($"{option.Folder}/swagger/swagger.json",
                     "eVAT Workflow Sample v1");
                 c.OAuthClientId(builder.Configuration["IdpSettings:ClientId"]);
                 c.OAuthClientSecret(builder.Configuration["IdpSettings:ClientSecret"]);
