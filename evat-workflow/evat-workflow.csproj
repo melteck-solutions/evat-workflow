@@ -9,15 +9,15 @@
 
 
   <ItemGroup Condition=" '$(EnvironmentName)' == 'webappsvm3'">
-    <Content Remove="appsettings.webappsvm3.json" />
+    <Content Update="appsettings.webappsvm3.json" />
+    <Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
-    <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
     <Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnvironmentName)' == 'appvm3'">
-    <Content Remove="appsettings.appvm3.json" />
+    <Content Update="appsettings.appvm3.json" />
 	<Content Remove="appsettings.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.persolqa.json" />
@@ -25,16 +25,16 @@
 	<Content Remove="appsettings.local.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnvironmentName)' == 'persolqa'">
-    <Content Remove="appsettings.appvm3.json" />
-    <Content Remove="appsettings.webappsvm3.json" />
+	<Content Update="appsettings.persolqa.json" />
+	<Content Remove="appsettings.appvm3.json" />
     <Content Remove="appsettings.webappsvm3.json" />
     <Content Remove="appsettings.cimsgh.json" />
 	<Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.json" />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnvironmentName)' == 'cimsgh'">
+    <Content Update="appsettings.cimsgh.json" />
     <Content Remove="appsettings.appvm3.json" />
-    <Content Remove="appsettings.webappsvm3.json" />
 	<Content Remove="appsettings.local.json" />
 	<Content Remove="appsettings.persolqa.json" />
     <Content Remove="appsettings.webappsvm3.json" />
