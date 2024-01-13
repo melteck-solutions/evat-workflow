@@ -41,6 +41,23 @@
 	<Content Remove="appsettings.json" />
   </ItemGroup>
 
+	<PropertyGroup Condition=" '$(Configuration)' == '' Or '$(Configuration)' == 'local'">
+		<EnvironmentName>local</EnvironmentName>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' != '' AND '$(Configuration)' == 'webappsvm3'">
+		<EnvironmentName>webappsvm3</EnvironmentName>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' != '' AND '$(Configuration)' == 'appvm3' ">
+		<EnvironmentName>appvm3</EnvironmentName>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' != '' AND '$(Configuration)' == 'persolqa' ">
+		<EnvironmentName>persolqa</EnvironmentName>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)' != '' AND '$(Configuration)' == 'cimsgh' ">
+		<EnvironmentName>cimsgh</EnvironmentName>
+	</PropertyGroup>
+	
+	
   <ItemGroup>
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
