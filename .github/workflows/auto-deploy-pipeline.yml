@@ -11,7 +11,6 @@ jobs:
         node-version: [ 6.0.x ]
     env:
       api-project:  "./"
-      api-build-version-path:  "./"
       upload-artifacts-path: "./publish"
       artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
       
@@ -59,7 +58,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: buildnumberapi
-        path: ${{api-build-version-path}}/buildnumberapi.txt
+        path: ${{api-project}}/buildnumberapi.txt
  deploy:
     needs: [build]
     runs-on: psl-webapps-vm3
@@ -78,7 +77,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: buildnumberapi
-        path: ${{api-build-version-path}}
+        path: ${{api-project}}
 
     - name: Print build ID
       run: |
