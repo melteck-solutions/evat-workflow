@@ -34,19 +34,22 @@ jobs:
         dotnet-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
-      run: dotnet restore ${{env.api-project}}
+      working-directory: ${{env.api-project}}
+      run: dotnet restore
 
     - name: Build
-      run: dotnet build ${{env.api-project}} --configuration Release --no-restore
+      working-directory: ${{env.api-project}}
+      run: dotnet build --configuration Release --no-restore
 
     - name: Publish
-      run: dotnet publish ${{env.api-project}} -c Release -o pashdotnetcorewebapp
+      working-directory: ${{env.api-project}}
+      run: dotnet publish -c Release /p:EnvironmentName=webappsvm3 -o ${{env.api-project}}/publish
 
     - name: publish artifacts
       uses: actions/upload-artifact@v2
       with:
        name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
-       path: ${{ env.upload-artifacts-path }}
+       path: ${{ env.upload-artifacts-path }}/publish
 
     - name: Store Build Number on Build Server 
       run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buildnumberapi.txt
