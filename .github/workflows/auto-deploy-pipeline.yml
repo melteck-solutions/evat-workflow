@@ -52,13 +52,13 @@ jobs:
        path: ${{ env.upload-artifacts-path }}
 
     - name: Store Build Number on Build Server 
-      run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buildnumberapi.txt
+      run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
     
     - name: Publish Upload Build File 
       uses: actions/upload-artifact@v2
       with:
-        name: buildnumberapi
-        path: ${{github.workspace}}/buildnumberapi.txt
+        name: .buid-version
+        path: ${{github.workspace}}/buid-version.txt
  deploy:
     needs: [build]
     runs-on: psl-webapps-vm3
@@ -76,12 +76,12 @@ jobs:
     - name: Download Build File
       uses: actions/download-artifact@v4
       with:
-        name: buildnumberapi
-        path: ${{github.workspace}}
+        name: .buid-version
+        path: ${{github.workspace}}/buid-version.txt
 
     - name: Print build ID
       run: |
-        $varbuildnumber = cat ${{github.workspace}}/buildnumberapi.txt
+        $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
         echo The result is $varbuildnumber
         echo "::set-output name=var-build-number::$varbuildnumber"
       id: selectbuildID
