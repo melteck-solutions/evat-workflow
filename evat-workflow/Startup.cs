@@ -63,11 +63,11 @@ namespace evat_workflow
                     License = new OpenApiLicense { Name = "Evat", Url = new Uri("http://www.evat.net/") }
                 });
 
-                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".XML";
+                //var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                //var commentsFileName = Assembly.GetExecutingAssembly().GetName().Name + ".XML";
 
-                var commentsFile = Path.Combine(baseDirectory, commentsFileName);
-                c.IncludeXmlComments(commentsFile);
+                //var commentsFile = Path.Combine(baseDirectory, commentsFileName);
+                //c.IncludeXmlComments(commentsFile);
 
                 c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
