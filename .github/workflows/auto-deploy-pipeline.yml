@@ -43,7 +43,7 @@ jobs:
 
     - name: Publish
       working-directory: ${{env.api-project}}
-      run: dotnet publish -c webappsvm3 --self-contained true  --framework net6.0  -p:PublishTrimmed=true /p:EnvironmentName=webappsvm3 -o publish
+      run: dotnet publish -c Release --self-contained true  --framework net6.0  -p:PublishTrimmed=true /p:EnvironmentName=webappsvm3 -o publish
 
     - name: publish artifacts
       uses: actions/upload-artifact@v3
