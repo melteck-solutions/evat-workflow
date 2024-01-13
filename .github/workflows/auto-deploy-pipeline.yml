@@ -43,13 +43,13 @@ jobs:
 
     - name: Publish
       working-directory: ${{env.api-project}}
-      run: dotnet publish -c Release /p:EnvironmentName=webappsvm3 -o ${{env.api-project}}/publish
+      run: dotnet publish -c Release /p:EnvironmentName=webappsvm3 -o publish
 
     - name: publish artifacts
       uses: actions/upload-artifact@v2
       with:
        name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
-       path: ${{ env.upload-artifacts-path }}/publish
+       path: ${{ env.upload-artifacts-path }}
 
     - name: Store Build Number on Build Server 
       run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buildnumberapi.txt
