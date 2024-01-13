@@ -11,7 +11,7 @@ jobs:
         node-version: [ 6.0.x ]
     env:
       api-project:  "./"
-      upload-artifacts-path: "./publish-api"
+      upload-artifacts-path: "./publish"
       artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
       
     steps:
