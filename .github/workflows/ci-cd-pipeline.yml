@@ -1,11 +1,10 @@
-name: CI CD Pipeline
+name: eVat Auto Deploy
 
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-  #  paths-ignore: [".vscode/**", "README.md", ".*"]
   workflow_dispatch:
 
 env:
