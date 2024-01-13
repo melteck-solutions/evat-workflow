@@ -55,7 +55,7 @@ jobs:
       run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
     
     - name: Publish Upload Build File 
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: .buid-version
         path: ${{github.workspace}}/buid-version.txt
@@ -78,7 +78,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: .buid-version
-        path: ${{github.workspace}}
+        path: ${{github.workspace}}/buid-version.txt
 
     - name: Print build ID
       run: |
