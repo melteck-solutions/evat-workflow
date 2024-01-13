@@ -46,7 +46,7 @@ jobs:
       run: dotnet publish -c Release /p:EnvironmentName=webappsvm3 -o publish
 
     - name: publish artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
        name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
        path: ${{ env.upload-artifacts-path }}
@@ -55,7 +55,7 @@ jobs:
       run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
     
     - name: Publish Upload Build File 
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: .buid-version
         path: ${{github.workspace}}/buid-version.txt
@@ -75,7 +75,7 @@ jobs:
       #run: echo ${{ needs.build.output.VAR-BUILD-NUMBER}}
 
     - name: Download Build File
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3
       with:
         name: .buid-version
         path: ${{github.workspace}}/buid-version.txt
@@ -88,7 +88,7 @@ jobs:
       id: selectbuildID
 
     - name: Download Release Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3
       with:
         name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
         path: ${{github.workspace}}/${{ env.artifact-package-zip-directory-path }}
