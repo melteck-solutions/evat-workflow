@@ -1,141 +1,251 @@
-name: CI CD Pipeline
-
+name: eVat Auto Deploy
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
-  #  paths-ignore: [".vscode/**", "README.md", ".*"]
-  workflow_dispatch:
-
+    branches:
+      - master
+  workflow_dispatch: null
 env:
-  GITHUB_WORKING_DIRECTORY: './'
-  IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'      
-  DOTNET_VERSION: '6.0.x'
- 
+  IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'
+  DOTNET_VERSION: 6.0.x
+
+  api-project:  "./"
+  upload-artifacts-path: "./publish"
+  iis-path: 'C:\inetpub\wwwroot\evat-workflow-api'
+  artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
+
 jobs:
-  Build:
-    runs-on: psl-app-vm3
+
+  run-lint:
+    runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        run: echo "Running Super linter for quality code checks"
+
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        run: echo "Running Testing"
+
+  build:
+    runs-on: psl-app-vm3
+    strategy:
+      matrix:
+        dotnet-version: [ 6.0.x ]
+        operating-system: [ psl-app-vm3 ]
+    needs:
+      - run-test
+    steps:
+
+      - name: Generate build number
+        id: buildnumber
+        uses: einaregilsson/build-number@v3 
+        with:
+          token: ${{ secrets.github_token }}
+      - name: Print build number - env
+        run: |
+         echo "::set-output name=VAR-BUILD-NUMBER::${env:BUILD_NUMBER}"
+         echo Build Id first way = ${env:BUILD_NUMBER}
+         echo Build Id second way = ${{ steps.buildnumber.outputs.build_number }}
+
       - uses: actions/checkout@v3
-      
-      - name: Setup .NET Core ⚙️⚙️
+      - name: Setup .NET Core - ${{ matrix.dotnet-version }} ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '${{ matrix.dotnet-version }}'
 
       - name: Install dependencies ⛑️⛑️
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
+        working-directory: '${{env.api-project}}'
         run: dotnet restore
-      
-      - name: Build with dotnet ⚒️⚒️
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet build --configuration Release --no-restore 
 
-      - name: Publish 🦍🦍
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-        
-      - name: Upload a Build Artifact ⤴️⤴️ 
+      - name: Build with dotnet ⚒️⚒️
+        working-directory: '${{env.api-project}}'
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish 
+        working-directory: '${{env.api-project}}'
+        run: >-
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish
+
+      - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-    
-  DeployDev:
+          name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}
+
+      - name: Store Build Number on Build Server 
+        run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
+
+      - name: Upload Build File Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: .buid-version
+          path: ${{github.workspace}}/buid-version.txt
+
+  deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
     if: github.event_name == 'pull_request'
-    needs: [Build]
+    needs:
+      - build
     runs-on: psl-app-vm3
-    environment: 
+    environment:
       name: Development
-      url: https://psl-app-vm3/evat-workflow-api/swagger
+      url: 'https://psl-app-vm3/evat-workflow-api/swagger'
     steps:
-      - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
-      - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
 
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
+
+      - name: Print build ID
+        run: |
+          $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+          echo The result is $varbuildnumber
+          echo "::set-output name=var-build-number::$varbuildnumber"
+        id: selectbuildID
+
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
 
-      - name: Curl api as a smoke test
-        run: curl https://psl-app-vm3/evat-workflow-api/health
-
-  DeployTest:
+  deploy-test:
     name: Deploy to IIS Dev (WEBAPPS-VM3)
     if: github.event.ref == 'refs/heads/master'
-    needs: [Build]
+    needs:
+      - build
     runs-on: psl-webapps-vm3
-    environment: 
+    environment:
       name: Development
       url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
     steps:
-      - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
-      - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
+      - name: Print build ID
+        run: |
+          $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+          echo The result is $varbuildnumber
+          echo "::set-output name=var-build-number::$varbuildnumber"
+        id: selectbuildID
+
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-        
-  DeployStaging:
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
+
+  deploy-staging:
     name: Deploy to IIS Staging (QA)
-    needs: [DeployTest]
+    needs:
+      - deploy-test
     runs-on: persolqa-com
-    environment: 
+    environment:
       name: Staging
       url: 'https://evat-workflow-api.persolqa.com/swagger'
     steps:
-      - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
-      - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
+      - name: Print build ID
+        run: |
+          $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+          echo The result is $varbuildnumber
+          echo "::set-output name=var-build-number::$varbuildnumber"
+        id: selectbuildID
+
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
 
-  DeployProd:
-    name: Deploy to IIS Production (CIMSGH.COM) 
-    needs: [DeployStaging]
+  deploy-prod:
+    name: Deploy to IIS Production (CIMSGH.COM)
+    needs:
+      - deploy-staging
     runs-on: psl-app-vm3
-    environment: 
+    environment:
       name: Production
       url: 'http://www.myapp.com'
     steps:
-      - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
-      - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
+      - name: Print build ID
+        run: |
+          $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+          echo The result is $varbuildnumber
+          echo "::set-output name=var-build-number::$varbuildnumber"
+        id: selectbuildID
+
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-      
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
+
+  report:
+   if: failure()
+   needs: [run-lint, deploy-prod]
+   runs-on: ubuntu-latest
+   steps:
+     - name: Output report information
+       run: | 
+        echo "Something went wrong"
+        echo "${{ toJSON(github) }}"
