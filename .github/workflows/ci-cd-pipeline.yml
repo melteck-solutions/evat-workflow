@@ -1,3 +1,4 @@
+---
 name: eVat Auto Deploy
 'on':
   push:
