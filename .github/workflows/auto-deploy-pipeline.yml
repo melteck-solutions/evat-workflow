@@ -8,7 +8,7 @@ jobs:
     runs-on: psl-webapps-vm3
     strategy:
       matrix:
-        node-version: [ 6.0.x ]
+        dotnet-version: [ 6.0.x ]
     env:
       api-project:  "./"
       upload-artifacts-path: "./publish"
@@ -28,10 +28,10 @@ jobs:
     
     - uses: actions/checkout@v3
 
-    - name: Setup .NET Core - ${{ matrix.node-version }}
+    - name: Setup .NET Core - ${{ matrix.dotnet-version }}
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.node-version }}
+        dotnet-version: ${{ matrix.dotnet-version }}
 
     - name: Install dependencies
       working-directory: ${{env.api-project}}
@@ -72,8 +72,8 @@ jobs:
 
     steps:
 
-    #- name: Print Build Number from BUILD job
-      #run: echo ${{ needs.build.output.VAR-BUILD-NUMBER}}
+    - name: Print Build Number from BUILD job
+      run: echo ${{ needs.build.output.VAR-BUILD-NUMBER}}
 
     - name: Download Build File
       uses: actions/download-artifact@v3
@@ -97,3 +97,6 @@ jobs:
     - name: Run Powershell commands to deploy release
       run: |
         & '${{env.deploy-powershell-script}}' ${{env.pool-name}} ${{env.site-name}} ${{env.physical-path}} ${{ env.port-name}}
+
+    - name: Curl api as a smoke test
+      run: curl https://domain.com/evat-workflow-api/health

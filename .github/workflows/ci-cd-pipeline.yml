@@ -66,6 +66,9 @@ jobs:
       - name: Bring the app back online
         run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
 
+      - name: Curl api as a smoke test
+        run: curl https://psl-app-vm3/evat-workflow-api/health
+
   DeployTest:
     name: Deploy to IIS Dev (WEBAPPS-VM3)
     if: github.event.ref == 'refs/heads/master'
