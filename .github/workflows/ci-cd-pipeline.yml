@@ -12,13 +12,20 @@ env:
   IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'
   DOTNET_VERSION: 6.0.x
 jobs:
+
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        run: echo "Running Testing"
+
   run-lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         run: echo "Running Super linter for quality code checks"
 
-  Build:
+  build:
     runs-on: psl-app-vm3
     needs:
       - run-lint
@@ -28,27 +35,38 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '${{ env.DOTNET_VERSION }}'
+
       - name: Install dependencies ⛑️⛑️
         working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
         run: dotnet restore
+
       - name: Build with dotnet ⚒️⚒️
         working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
         run: dotnet build --configuration Release --no-restore
-      - name: "Publish \U0001F98D\U0001F98D"
+
+      - name: Publish 
         working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
         run: >-
-          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3
-          --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-webappsvm3'
+          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-appvm3'
+          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-persolqa'
+          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-cimsgh'
+
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-  DeployDev:
+          path: |
+            '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-webappsvm3'
+            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-appvm3'
+            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-persolqa'
+            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-cimsgh'
+
+  deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
     if: github.event_name == 'pull_request'
     needs:
-      - Build
+      - build
     runs-on: psl-app-vm3
     environment:
       name: Development
@@ -69,11 +87,12 @@ jobs:
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
-  DeployTest:
+
+  deploy-test:
     name: Deploy to IIS Dev (WEBAPPS-VM3)
     if: github.event.ref == 'refs/heads/master'
     needs:
-      - Build
+      - build
     runs-on: psl-webapps-vm3
     environment:
       name: Development
@@ -94,10 +113,11 @@ jobs:
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
-  DeployStaging:
+
+  deploy-staging:
     name: Deploy to IIS Staging (QA)
     needs:
-      - DeployTest
+      - deploytest
     runs-on: persolqa-com
     environment:
       name: Staging
@@ -118,10 +138,11 @@ jobs:
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
-  DeployProd:
+
+  deploy-prod:
     name: Deploy to IIS Production (CIMSGH.COM)
     needs:
-      - DeployStaging
+      - deploy-staging
     runs-on: psl-app-vm3
     environment:
       name: Production
@@ -142,3 +163,10 @@ jobs:
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
+
+  report:
+   needs: [run-lint, deploy-dev, deploy-test, deploy-staging, deploy-prod]
+   runs-on: ubuntu-latest
+   steps:
+     - name: Checkout code
+       run: echo "send report"
