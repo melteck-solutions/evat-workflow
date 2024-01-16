@@ -13,22 +13,29 @@ env:
   DOTNET_VERSION: '6.0.x'
  
 jobs:
-  Test:
+  run-lint:
     runs-on: psl-app-vm3
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+     - name: Checkout code
+       uses: actions/checkout@v2
+       with:
+         # Full git history is needed to get a proper list of changed files within `super-linter`
+         fetch-depth: 0
 
-      - name: .NET Lint
-        uses: zyactions/dotnet-lint@v1
-        with:
-          working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-          implicit-restore: true
+     - name: Lint Code Base
+       uses: github/super-linter@v5
+       env:
+         VALIDATE_ALL_CODEBASE: false
+         VALIDATE_JSCPD: false
+         VALIDATE_MARKDOWN: false
+         VALIDATE_NATURAL_LANGUAGE: false
+         #DEFAULT_BRANCH: main
+         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   Build:
     runs-on: psl-app-vm3
-    needs: [Test]
+    needs: [run-lint]
     steps:
       - uses: actions/checkout@v3
       
