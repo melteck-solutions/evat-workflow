@@ -1,158 +1,153 @@
 name: eVat Auto Deploy
-
-on:
+'on':
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
-  workflow_dispatch:
-
+    branches:
+      - master
+  workflow_dispatch: null
 env:
-  GITHUB_WORKING_DIRECTORY: './'
-  IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'      
-  DOTNET_VERSION: '6.0.x'
- 
+  GITHUB_WORKING_DIRECTORY: ./
+  IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'
+  DOTNET_VERSION: 6.0.x
 jobs:
   run-lint:
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout code
-       uses: actions/checkout@v2
-       with:
-         # Full git history is needed to get a proper list of changed files within `super-linter`
-         fetch-depth: 0
-
-     - name: Lint Code Base
-       uses: github/super-linter@v5
-       env:
-         VALIDATE_ALL_CODEBASE: false
-         VALIDATE_JSCPD: false
-         VALIDATE_MARKDOWN: false
-         VALIDATE_NATURAL_LANGUAGE: false
-         #DEFAULT_BRANCH: main
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Lint Code Base
+        uses: github/super-linter@v5
+        env:
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JSCPD: false
+          VALIDATE_MARKDOWN: false
+          VALIDATE_NATURAL_LANGUAGE: false
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
   Build:
     runs-on: psl-app-vm3
-    needs: [run-lint]
+    needs:
+      - run-lint
     steps:
       - uses: actions/checkout@v3
-      
       - name: Setup .NET Core ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
+          dotnet-version: '${{ env.DOTNET_VERSION }}'
       - name: Install dependencies ⛑️⛑️
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
+        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
         run: dotnet restore
-      
       - name: Build with dotnet ⚒️⚒️
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet build --configuration Release --no-restore 
-
-      - name: Publish 🦍🦍
-        working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
-        run: dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-        
-      - name: Upload a Build Artifact ⤴️⤴️ 
+        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
+        run: dotnet build --configuration Release --no-restore
+      - name: "Publish \U0001F98D\U0001F98D"
+        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
+        run: >-
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3
+          --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
+      - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
-    
   DeployDev:
     name: Deploy to IIS Test (APP-VM3)
     if: github.event_name == 'pull_request'
-    needs: [Build]
+    needs:
+      - Build
     runs-on: psl-app-vm3
-    environment: 
+    environment:
       name: Development
-      url: https://psl-app-vm3/evat-workflow-api/swagger
+      url: 'https://psl-app-vm3/evat-workflow-api/swagger'
     steps:
       - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
       - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
-
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
   DeployTest:
     name: Deploy to IIS Dev (WEBAPPS-VM3)
     if: github.event.ref == 'refs/heads/master'
-    needs: [Build]
+    needs:
+      - Build
     runs-on: psl-webapps-vm3
-    environment: 
+    environment:
       name: Development
       url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
     steps:
       - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
       - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
-
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-        
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
   DeployStaging:
     name: Deploy to IIS Staging (QA)
-    needs: [DeployTest]
+    needs:
+      - DeployTest
     runs-on: persolqa-com
-    environment: 
+    environment:
       name: Staging
       url: 'https://evat-workflow-api.persolqa.com/swagger'
     steps:
       - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
       - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
-
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
   DeployProd:
-    name: Deploy to IIS Production (CIMSGH.COM) 
-    needs: [DeployStaging]
+    name: Deploy to IIS Production (CIMSGH.COM)
+    needs:
+      - DeployStaging
     runs-on: psl-app-vm3
-    environment: 
+    environment:
       name: Production
       url: 'http://www.myapp.com'
     steps:
       - name: Take application offline
-        run: New-Item -Type File -Name app_offline.htm -Path ${{ env.IIS_WEBAPP_PATH }} -Force
-        
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.IIS_WEBAPP_PATH }} -Force
       - name: Set Offline HTML file
-        run: Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under Maintenance'
-
+        run: >-
+          Set-Content ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm 'Site Under
+          Maintenance'
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
           name: .net-app
-          path: ${{ env.IIS_WEBAPP_PATH }}
-  
+          path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
-        run: Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm
-      
+        run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
