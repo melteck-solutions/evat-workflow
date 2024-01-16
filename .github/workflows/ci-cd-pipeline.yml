@@ -47,20 +47,14 @@ jobs:
       - name: Publish 
         working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
         run: >-
-          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-webappsvm3'
-          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-appvm3'
-          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-persolqa'
-          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-cimsgh'
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
 
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
           path: |
-            '${{ env.GITHUB_WORKING_DIRECTORY }}/publish-webappsvm3'
-            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-appvm3'
-            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-persolqa'
-            #'${{ env.GITHUB_WORKING_DIRECTORY }}/publish-cimsgh'
+            '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
 
   deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
