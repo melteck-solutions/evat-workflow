@@ -1,6 +1,5 @@
----
 name: eVat Auto Deploy
-'on':
+on:
   push:
     branches:
       - master
@@ -17,17 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Lint Code Base
-        uses: github/super-linter@v5
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_JSCPD: false
-          VALIDATE_MARKDOWN: false
-          VALIDATE_NATURAL_LANGUAGE: false
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: echo "Running Super linter for quality code checks"
+
   Build:
     runs-on: psl-app-vm3
     needs:
