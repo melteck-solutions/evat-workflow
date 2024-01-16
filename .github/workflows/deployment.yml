@@ -117,7 +117,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -156,7 +156,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -194,7 +194,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -232,7 +232,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
