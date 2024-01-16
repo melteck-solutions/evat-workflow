@@ -8,16 +8,15 @@ on:
       - master
   workflow_dispatch: null
 env:
-  GITHUB_WORKING_DIRECTORY: ./
   IIS_WEBAPP_PATH: 'C:\inetpub\wwwroot\evat-workflow-api'
   DOTNET_VERSION: 6.0.x
-jobs:
 
-  run-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        run: echo "Running Testing"
+  api-project:  "./"
+  upload-artifacts-path: "./publish"
+  iis-path: 'C:\inetpub\wwwroot\evat-workflow-api'
+  artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
+
+jobs:
 
   run-lint:
     runs-on: ubuntu-latest
@@ -25,36 +24,60 @@ jobs:
       - name: Checkout code
         run: echo "Running Super linter for quality code checks"
 
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        run: echo "Running Testing"
+
   build:
     runs-on: psl-app-vm3
+    strategy:
+      matrix:
+        dotnet-version: [ 6.0.x ]
     needs:
       - run-test
     steps:
+
+      - name: Generate build number
+        id: buildnumber
+        uses: einaregilsson/build-number@v3 
+        with:
+          token: ${{ secrets.github_token }}
+      - name: Print build number - env
+        run: |
+         echo "::set-output name=VAR-BUILD-NUMBER::${env:BUILD_NUMBER}"
+         echo Build Id first way = ${env:BUILD_NUMBER}
+         echo Build Id second way = ${{ steps.buildnumber.outputs.build_number }}
+
       - uses: actions/checkout@v3
-      - name: Setup .NET Core ⚙️⚙️
+      - name: Setup .NET Core - ${{ matrix.dotnet-version }} ⚙️⚙️
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '${{ env.DOTNET_VERSION }}'
+          dotnet-version: '${{ matrix.dotnet-version }}'
 
       - name: Install dependencies ⛑️⛑️
-        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
+        working-directory: '${{env.api-project}}'
         run: dotnet restore
 
       - name: Build with dotnet ⚒️⚒️
-        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
+        working-directory: '${{env.api-project}}'
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish 
-        working-directory: '${{ env.GITHUB_WORKING_DIRECTORY }}'
+        working-directory: '${{env.api-project}}'
         run: >-
-          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish'
 
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
-          name: .net-app
-          path: |
-            '${{ env.GITHUB_WORKING_DIRECTORY }}/publish'
+          name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}
+
+      - name: Store Build Number on Build Server 
+        run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
+
 
   deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
@@ -77,7 +100,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
@@ -103,7 +126,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
@@ -128,7 +151,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
@@ -153,7 +176,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: .net-app
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build-number}}
           path: '${{ env.IIS_WEBAPP_PATH }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
@@ -166,4 +189,4 @@ jobs:
      - name: Output report information
        run: | 
         echo "Something went wrong"
-        echo "${{ github }}"
+        echo "${{ toJSON(github) }}"
