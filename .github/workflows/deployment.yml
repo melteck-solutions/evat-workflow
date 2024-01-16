@@ -93,11 +93,11 @@ jobs:
       url: 'https://psl-app-vm3/evat-workflow-api/swagger'
     steps:
 
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
       - name: Print build ID
         run: |
@@ -132,11 +132,11 @@ jobs:
       name: Development
       url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
     steps:
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
       - name: Print build ID
         run: |
@@ -170,11 +170,11 @@ jobs:
       name: Staging
       url: 'https://evat-workflow-api.persolqa.com/swagger'
     steps:
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
       - name: Print build ID
         run: |
@@ -208,11 +208,11 @@ jobs:
       name: Production
       url: 'http://www.myapp.com'
     steps:
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: .buid-version
+      #    path: ${{github.workspace}}/buid-version.txt
 
       - name: Print build ID
         run: |
