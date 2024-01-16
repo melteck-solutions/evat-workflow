@@ -28,7 +28,7 @@ jobs:
   build:
     runs-on: psl-app-vm3
     needs:
-      - run-lint
+      - run-test
     steps:
       - uses: actions/checkout@v3
       - name: Setup .NET Core ⚙️⚙️
@@ -159,8 +159,11 @@ jobs:
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
 
   report:
-   needs: [run-lint, run-test, deploy-test, deploy-staging, deploy-prod]
+   if: failure()
+   needs: [run-lint, deploy-prod]
    runs-on: ubuntu-latest
    steps:
-     - name: Checkout code
-       run: echo "send report"
+     - name: Output report information
+       run: | 
+        echo "Something went wrong"
+        echo "${{ github }}"
