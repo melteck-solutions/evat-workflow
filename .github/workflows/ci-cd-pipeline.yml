@@ -13,8 +13,22 @@ env:
   DOTNET_VERSION: '6.0.x'
  
 jobs:
+  Test:
+    runs-on: psl-app-vm3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: .NET Lint
+        uses: zyactions/dotnet-lint@v1
+        with:
+          working-directory: ${{ env.GITHUB_WORKING_DIRECTORY }}
+          implicit-restore: true
+
+
   Build:
     runs-on: psl-app-vm3
+    needs: [Test]
     steps:
       - uses: actions/checkout@v3
       

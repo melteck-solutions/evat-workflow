@@ -31,6 +31,16 @@ jobs:
     
     - uses: actions/checkout@v3
 
+    - name: Cache NuGet Packages
+      id: nuget-packages
+      uses: actions/cache@v3
+      env:
+        cache-name: nuget-package-cache
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-${{ env.cache-name }}
+
+
     - name: Setup .NET Core - ${{ matrix.node-version }}
       uses: actions/setup-dotnet@v3
       with:
