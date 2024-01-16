@@ -67,7 +67,7 @@ jobs:
       - name: Publish 
         working-directory: '${{env.api-project}}'
         run: >-
-          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish'
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish
 
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
