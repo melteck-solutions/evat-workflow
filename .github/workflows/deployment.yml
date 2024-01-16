@@ -70,7 +70,7 @@ jobs:
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
-          name: api-artifact-${{ steps.buildnumber.outputs.build_number }}
+          name: api-artifact #-${{ steps.buildnumber.outputs.build_number }}
           path: ${{ env.upload-artifacts-path }}
 
       - name: Store Build Number on Build Server 
