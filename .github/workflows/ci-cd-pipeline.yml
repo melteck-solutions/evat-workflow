@@ -165,7 +165,7 @@ jobs:
         run: 'Remove-Item ${{ env.IIS_WEBAPP_PATH }}\app_offline.htm'
 
   report:
-   needs: [run-lint, deploy-dev, deploy-test, deploy-staging, deploy-prod]
+   needs: [run-lint, deploy-test, deploy-staging, deploy-prod]
    runs-on: ubuntu-latest
    steps:
      - name: Checkout code
