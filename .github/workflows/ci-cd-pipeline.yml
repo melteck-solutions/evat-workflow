@@ -14,7 +14,7 @@ env:
  
 jobs:
   run-lint:
-    runs-on: psl-app-vm3
+    runs-on: ubuntu-latest
     steps:
      - name: Checkout code
        uses: actions/checkout@v2
