@@ -146,7 +146,7 @@ jobs:
 
       - name: Print build ID
         run: |
-          $varbuildnumber = cat build_number.txt
+          $varbuildnumber = sudo cat build_number.txt
           echo The result is $varbuildnumber
           echo "::set-output name=var-build_number::$varbuildnumber"
         id: selectbuildID
