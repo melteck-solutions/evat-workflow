@@ -179,7 +179,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+          path: ${{github.workspace}}
 
       - name: Print build ID
         run: |
@@ -217,7 +217,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+          path: ${{github.workspace}}
 
       - name: Print build ID
         run: |
