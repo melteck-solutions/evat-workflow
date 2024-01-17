@@ -1,0 +1,197 @@
+﻿name: eVAT-API-Build-Deployments
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch: null
+
+env:
+  api-project:  "./"
+  upload-artifacts-path: "./publish"
+  iis-path: 'C:\inetpub\wwwroot\evat-workflow-api'
+  artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
+
+jobs:
+
+  run-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        run: echo "Running Super linter for quality code checks"
+
+  run-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        run: echo "Running Testing"
+
+  build:
+    continue-on-error: true
+    strategy:
+      matrix:
+        dotnet-version: [ 6.0.x ]
+        operating-system: [psl-app-vm3]
+    runs-on: '${{ matrix.operating-system }}'
+    needs:
+      - run-test
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core - ${{ matrix.dotnet-version }} ⚙️⚙️
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '${{ matrix.dotnet-version }}'
+
+      - name: Install dependencies ⛑️⛑️
+        working-directory: '${{env.api-project}}'
+        run: dotnet restore
+
+      - name: Build with dotnet ⚒️⚒️
+        working-directory: '${{env.api-project}}'
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish 
+        working-directory: '${{env.api-project}}'
+        run: |
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output ${{ env.upload-artifacts-path }}/publish-webappsvm3
+          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output ${{ env.upload-artifacts-path }}/publish-appvm3
+          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output ${{ env.upload-artifacts-path }}/publish-persolqa
+          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output ${{ env.upload-artifacts-path }}/publish-cimsgh
+
+      - name: Upload a Build Artifact (webappsvm3) ⤴️⤴️
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-webappsvm3
+          path: ${{ env.upload-artifacts-path }}/publish-webappsvm3
+
+      - name: Upload a Build Artifact (appvm3) ⤴️⤴️
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-appvm3
+          path: ${{ env.upload-artifacts-path }}/publish-appvm3
+
+      - name: Upload a Build Artifact (persolqa) ⤴️⤴️
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-persolqa
+          path: ${{ env.upload-artifacts-path }}/publish-persolqa
+
+      - name: Upload a Build Artifact (cimsgh) ⤴️⤴️
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-cimsgh
+          path: ${{ env.upload-artifacts-path }}/publish-cimsgh
+
+  deploy-dev:
+    name: Deploy to IIS Test (APP-VM3)
+    if: github.event_name == 'pull_request'
+    needs:
+      - build
+    runs-on: psl-app-vm3
+    environment:
+      name: Development
+      url: 'https://psl-app-vm3/evat-workflow-api/swagger'
+    steps:
+
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{ env.iis-path }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.iis-path }}\app_offline.htm 'Site Under
+          Maintenance'
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact-appvm3
+          path: '${{ env.iis-path }}'
+      - name: Bring the app back online
+        run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
+
+  deploy-test:
+    name: Deploy to IIS Dev (WEBAPPS-VM3)
+    if: github.event.ref == 'refs/heads/master'
+    needs:
+      - build
+    runs-on: psl-webapps-vm3
+    environment:
+      name: Development
+      url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
+    steps:
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.iis-path }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.iis-path }}\app_offline.htm 'Site Under
+          Maintenance'
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact-webappsvm3
+          path: '${{ env.iis-path }}'
+      - name: Bring the app back online
+        run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
+
+  deploy-staging:
+    name: Deploy to IIS Staging (QA)
+    needs:
+      - deploy-test
+    runs-on: persolqa-com
+    environment:
+      name: Staging
+      url: 'https://evat-workflow-api.persolqa.com/swagger'
+    steps:
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.iis-path }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.iis-path }}\app_offline.htm 'Site Under
+          Maintenance'
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact-persolqa
+          path: '${{ env.iis-path }}'
+      - name: Bring the app back online
+        run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
+
+  deploy-prod:
+    name: Deploy to IIS Production (CIMSGH.COM)
+    needs:
+      - deploy-staging
+    runs-on: psl-app-vm3
+    environment:
+      name: Production
+      url: 'https://evat-workflow-api.cimsgh.com/swagger'
+    steps:
+      - name: Take application offline
+        run: >-
+          New-Item -Type File -Name app_offline.htm -Path ${{
+          env.iis-path }} -Force
+      - name: Set Offline HTML file
+        run: >-
+          Set-Content ${{ env.iis-path }}\app_offline.htm 'Site Under
+          Maintenance'
+      - name: Download new binaries over the top of the app
+        uses: actions/download-artifact@v4
+        with:
+          name: api-artifact-cimsgh
+          path: '${{ env.iis-path }}'
+      - name: Bring the app back online
+        run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
+
+  report:
+   if: failure()
+   needs: [run-lint, deploy-prod]
+   runs-on: ubuntu-latest
+   steps:
+     - name: Output report information
+       run: | 
+        echo "Something went wrong"
+        echo "${{ toJSON(github) }}"
