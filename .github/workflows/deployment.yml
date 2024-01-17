@@ -37,23 +37,23 @@ jobs:
     strategy:
       matrix:
         dotnet-version: [ 6.0.x ]
-        operating-system: [ubuntu-latest]
+        operating-system: [psl-app-vm3]
     runs-on: '${{ matrix.operating-system }}'
     needs:
       - run-test
     steps:
 
-      - name: Generate build number
-        id: buildnumber
-        uses: onyxmueller/build-tag-number@v1
-        with:
-          token: ${{secrets.github_token}} 
+      #- name: Generate build number
+      #  id: buildnumber
+      #  uses: onyxmueller/build-tag-number@v1
+      #  with:
+      #    token: ${{secrets.github_token}} 
 
-      - name: Print build number - env
-        run: |
-         echo "::set-output name=VAR-BUILD-NUMBER::${env:BUILD_NUMBER}"
-         echo Build Id first way = ${env:BUILD_NUMBER}
-         echo Build Id second way = ${{ steps.buildnumber.outputs.build_number }}
+      #- name: Print build number - env
+      #  run: |
+      #   echo "::set-output name=VAR-BUILD-NUMBER::${env:BUILD_NUMBER}"
+      #   echo Build Id first way = ${env:BUILD_NUMBER}
+      #   echo Build Id second way = ${{ steps.buildnumber.outputs.build_number }}
 
       - uses: actions/checkout@v3
       - name: Setup .NET Core - ${{ matrix.dotnet-version }} ⚙️⚙️
@@ -72,25 +72,43 @@ jobs:
       - name: Publish 
         working-directory: '${{env.api-project}}'
         run: |
-          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish
-          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output publish-appvm3
-          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output publish-persolqa
-          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output publish-cimsgh
+          dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output ${{ env.upload-artifacts-path }}/publish-webappsvm3
+          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output ${{ env.upload-artifacts-path }}/publish-appvm3
+          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output ${{ env.upload-artifacts-path }}/publish-persolqa
+          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output ${{ env.upload-artifacts-path }}/publish-cimsgh
 
-      - name: Upload a Build Artifact ⤴️⤴️
+      - name: Upload a Build Artifact (webappsvm3) ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
-          name: api-artifact #-${{ steps.buildnumber.outputs.build_number }}
-          path: ${{ env.upload-artifacts-path }}
+          name: api-artifact-webappsvm3 #-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}/webappsvm3
 
-      - name: Store Build Number on Build Server 
-        run: echo ${{ steps.buildnumber.outputs.build_number }} > build_number.txt
+      - name: Upload a Build Artifact (appvm3) ⤴️⤴️
+         uses: actions/upload-artifact@v4
+         with:
+           name: api-artifact-appvm3 #-${{ steps.buildnumber.outputs.build_number }}
+           path: ${{ env.upload-artifacts-path }}/appvm3
 
-      - name: Upload Build File Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload a Build Artifact (persolqa) ⤴️⤴️
+        uses: actions/upload-artifact@v4
         with:
-          name: build_number
-          path: ${{github.workspace}}/build_number.txt
+          name: api-artifact-persolqa #-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}/persolqa
+
+      - name: Upload a Build Artifact (cimsgh) ⤴️⤴️
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-cimsgh #-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}/cimsgh
+
+      #- name: Store Build Number on Build Server 
+      #  run: echo ${{ steps.buildnumber.outputs.build_number }} > build_number.txt
+
+      #- name: Upload Build File Artifact
+      #  uses: actions/upload-artifact@v3
+      #  with:
+      #    name: build_number
+      #    path: ${{github.workspace}}/build_number.txt
 
   deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
@@ -127,7 +145,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact-${{steps.selectbuildID.outputs.var-build_number}}
+          name: api-artifact-appvm3
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -166,7 +184,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact #-${{steps.selectbuildID.outputs.var-build_number}}
+          name: api-artifact-webappsvm3 #-${{steps.selectbuildID.outputs.var-build_number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -204,7 +222,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact #-${{steps.selectbuildID.outputs.var-build_number}}
+          name: api-artifact-persolqa #-${{steps.selectbuildID.outputs.var-build_number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -242,7 +260,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact
+          name: api-artifact-cimsgh
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
