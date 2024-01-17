@@ -14,10 +14,6 @@ env:
   iis-path: 'C:\inetpub\wwwroot\evat-workflow-api'
   artifact-package-zip-directory-path: "_evat-workflow-ci/evat-workflow-api-drop"
 
-permissions:
-  contents: write
-  pages: write
-
 jobs:
 
   run-lint:
