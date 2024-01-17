@@ -29,10 +29,12 @@ jobs:
         run: echo "Running Testing"
 
   build:
-    runs-on: windows-latest
+    continue-on-error: true
     strategy:
       matrix:
         dotnet-version: [ 6.0.x ]
+        operating-system: [windows-latest, ubuntu-latest]
+    runs-on: '${{ matrix.operating-system }}'
     needs:
       - run-test
     steps:
@@ -64,8 +66,11 @@ jobs:
 
       - name: Publish 
         working-directory: '${{env.api-project}}'
-        run: >-
+        run: |
           dotnet publish --configuration Release  /p:EnvironmentName=webappsvm3 --output publish
+          dotnet publish --configuration Release  /p:EnvironmentName=appvm3 --output publish-appvm3
+          dotnet publish --configuration Release  /p:EnvironmentName=persolqa --output publish-persolqa
+          dotnet publish --configuration Release  /p:EnvironmentName=cimsgh --output publish-cimsgh
 
       - name: Upload a Build Artifact ⤴️⤴️
         uses: actions/upload-artifact@v4
