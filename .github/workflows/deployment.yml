@@ -80,10 +80,10 @@ jobs:
           path: ${{ env.upload-artifacts-path }}/webappsvm3
 
       - name: Upload a Build Artifact (appvm3) ⤴️⤴️
-         uses: actions/upload-artifact@v4
-         with:
-           name: api-artifact-appvm3 #-${{ steps.buildnumber.outputs.build_number }}
-           path: ${{ env.upload-artifacts-path }}/appvm3
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-artifact-appvm3 #-${{ steps.buildnumber.outputs.build_number }}
+          path: ${{ env.upload-artifacts-path }}/appvm3
 
       - name: Upload a Build Artifact (persolqa) ⤴️⤴️
         uses: actions/upload-artifact@v4
