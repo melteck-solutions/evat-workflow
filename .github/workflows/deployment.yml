@@ -185,7 +185,7 @@ jobs:
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
 
-  deploy-staging:`  
+  deploy-staging:
     name: Deploy to IIS Staging (QA)
     needs:
       - deploy-test
