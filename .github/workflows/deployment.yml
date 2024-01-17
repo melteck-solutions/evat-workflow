@@ -41,9 +41,10 @@ jobs:
 
       - name: Generate build number
         id: buildnumber
-        uses: einaregilsson/build-number@v3 
+        uses: onyxmueller/build-tag-number@v1
         with:
-          token: ${{ secrets.github_token }}
+          token: ${{secrets.github_token}} 
+
       - name: Print build number - env
         run: |
          echo "::set-output name=VAR-BUILD-NUMBER::${env:BUILD_NUMBER}"
@@ -79,13 +80,13 @@ jobs:
           path: ${{ env.upload-artifacts-path }}
 
       - name: Store Build Number on Build Server 
-        run: echo ${{ steps.buildnumber.outputs.build_number }} > ${{github.workspace}}/buid-version.txt
+        run: echo ${{ steps.buildnumber.outputs.build_number }} > build_number.txt
 
       - name: Upload Build File Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: .buid-version
-          path: ${{github.workspace}}/buid-version.txt
+          name: build_number
+          path: ${{github.workspace}}/build_number.txt
 
   deploy-dev:
     name: Deploy to IIS Test (APP-VM3)
@@ -98,18 +99,18 @@ jobs:
       url: 'https://psl-app-vm3/evat-workflow-api/swagger'
     steps:
 
-      #- name: Download Build File
-      #  uses: actions/download-artifact@v3
-      #  with:
-      #    name: .buid-version
-      #    path: ${{github.workspace}}/buid-version.txt
+      - name: Download Build File
+        uses: actions/download-artifact@v3
+        with:
+          name: build_number
+          path: build_number.txt
 
-      #- name: Print build ID
-      #  run: |
-      #    $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
-      #    echo The result is $varbuildnumber
-      #    echo "::set-output name=var-build-number::$varbuildnumber"
-      #  id: selectbuildID
+      - name: Print build ID
+        run: |
+          $varbuildnumber = cat build_number.txt
+          echo The result is $varbuildnumber
+          echo "::set-output name=var-build_number::$varbuildnumber"
+        id: selectbuildID
 
       - name: Take application offline
         run: >-
@@ -122,7 +123,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact-${{steps.selectbuildID.outputs.var-build_number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -140,14 +141,14 @@ jobs:
       #- name: Download Build File
       #  uses: actions/download-artifact@v3
       #  with:
-      #    name: .buid-version
-      #    path: ${{github.workspace}}/buid-version.txt
+      #    name: build_number
+      #    path: ${{github.workspace}}/build_number.txt
 
       #- name: Print build ID
       #  run: |
-      #    $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+      #    $varbuildnumber = cat ${{github.workspace}}/build_number.txt
       #    echo The result is $varbuildnumber
-      #    echo "::set-output name=var-build-number::$varbuildnumber"
+      #    echo "::set-output name=var-build_number::$varbuildnumber"
       #  id: selectbuildID
 
       - name: Take application offline
@@ -161,7 +162,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build_number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -178,14 +179,14 @@ jobs:
       #- name: Download Build File
       #  uses: actions/download-artifact@v3
       #  with:
-      #    name: .buid-version
+      #    name: build_number
       #    path: ${{github.workspace}}
 
       #- name: Print build ID
       #  run: |
-      #    $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+      #    $varbuildnumber = cat ${{github.workspace}}/build_number.txt
       #    echo The result is $varbuildnumber
-      #    echo "::set-output name=var-build-number::$varbuildnumber"
+      #    echo "::set-output name=var-build_number::$varbuildnumber"
       #  id: selectbuildID
 
       - name: Take application offline
@@ -199,7 +200,7 @@ jobs:
       - name: Download new binaries over the top of the app
         uses: actions/download-artifact@v4
         with:
-          name: api-artifact #-${{steps.selectbuildID.outputs.var-build-number}}
+          name: api-artifact #-${{steps.selectbuildID.outputs.var-build_number}}
           path: '${{ env.iis-path }}'
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
@@ -216,14 +217,14 @@ jobs:
       #- name: Download Build File
       #  uses: actions/download-artifact@v3
       #  with:
-      #    name: .buid-version
+      #    name: build_number
       #    path: ${{github.workspace}}
 
       #- name: Print build ID
       #  run: |
-      #    $varbuildnumber = cat ${{github.workspace}}/buid-version.txt
+      #    $varbuildnumber = cat ${{github.workspace}}/build_number.txt
       #    echo The result is $varbuildnumber
-      #    echo "::set-output name=var-build-number::$varbuildnumber"
+      #    echo "::set-output name=var-build_number::$varbuildnumber"
       #  id: selectbuildID
 
       - name: Take application offline
