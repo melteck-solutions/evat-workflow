@@ -103,18 +103,18 @@ jobs:
       url: 'https://psl-app-vm3/evat-workflow-api/swagger'
     steps:
 
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: build_number
-          path: build_number.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: build_number
+      #    path: build_number.txt
 
-      - name: Print build ID
-        run: |
-          $varbuildnumber = cat build_number.txt
-          echo The result is $varbuildnumber
-          echo "::set-output name=var-build_number::$varbuildnumber"
-        id: selectbuildID
+      #- name: Print build ID
+      #  run: |
+      #    $varbuildnumber = cat build_number.txt
+      #    echo The result is $varbuildnumber
+      #    echo "::set-output name=var-build_number::$varbuildnumber"
+      #  id: selectbuildID
 
       - name: Take application offline
         run: >-
@@ -142,18 +142,18 @@ jobs:
       name: Development
       url: 'https://psl-webapps-vm3/evat-workflow-api/swagger'
     steps:
-      - name: Download Build File
-        uses: actions/download-artifact@v3
-        with:
-          name: build_number
-          path: build_number.txt
+      #- name: Download Build File
+      #  uses: actions/download-artifact@v3
+      #  with:
+      #    name: build_number
+      #    path: build_number.txt
 
-      - name: Print build ID
-        run: |
-          $varbuildnumber = cat build_number.txt
-          echo The result is $varbuildnumber
-          echo "::set-output name=var-build_number::$varbuildnumber"
-        id: selectbuildID
+      #- name: Print build ID
+      #  run: |
+      #    $varbuildnumber = cat build_number.txt
+      #    echo The result is $varbuildnumber
+      #    echo "::set-output name=var-build_number::$varbuildnumber"
+      #  id: selectbuildID
 
       - name: Take application offline
         run: >-
