@@ -77,25 +77,25 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact-webappsvm3 #-${{ steps.buildnumber.outputs.build_number }}
-          path: ${{ env.upload-artifacts-path }}/webappsvm3
+          path: ${{ env.upload-artifacts-path }}/publish-webappsvm3
 
       - name: Upload a Build Artifact (appvm3) ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact-appvm3 #-${{ steps.buildnumber.outputs.build_number }}
-          path: ${{ env.upload-artifacts-path }}/appvm3
+          path: ${{ env.upload-artifacts-path }}/publish-appvm3
 
       - name: Upload a Build Artifact (persolqa) ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact-persolqa #-${{ steps.buildnumber.outputs.build_number }}
-          path: ${{ env.upload-artifacts-path }}/persolqa
+          path: ${{ env.upload-artifacts-path }}/publish-persolqa
 
       - name: Upload a Build Artifact (cimsgh) ⤴️⤴️
         uses: actions/upload-artifact@v4
         with:
           name: api-artifact-cimsgh #-${{ steps.buildnumber.outputs.build_number }}
-          path: ${{ env.upload-artifacts-path }}/cimsgh
+          path: ${{ env.upload-artifacts-path }}/publish-cimsgh
 
       #- name: Store Build Number on Build Server 
       #  run: echo ${{ steps.buildnumber.outputs.build_number }} > build_number.txt
@@ -185,7 +185,7 @@ jobs:
       - name: Bring the app back online
         run: 'Remove-Item ${{ env.iis-path }}\app_offline.htm'
 
-  deploy-staging:
+  deploy-staging:`  
     name: Deploy to IIS Staging (QA)
     needs:
       - deploy-test
