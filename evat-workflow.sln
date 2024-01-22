@@ -7,10 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "evat-workflow", "evat-workf
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{79491940-D6F5-4619-BE2B-AE7316BF302D}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\auto-deploy.yml = .github\workflows\auto-deploy.yml
-		.github\workflows\auto-merge.yml = .github\workflows\auto-merge.yml
-		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-		.github\workflows\interactions.yml = .github\workflows\interactions.yml
+		.github\workflows\deploy.yml = .github\workflows\deploy.yml
 	EndProjectSection
 EndProject
 Global
