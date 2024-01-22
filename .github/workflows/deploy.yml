@@ -13,7 +13,7 @@ env:
 jobs:
   build:
 
-    runs-on: psl-app-vm3
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
