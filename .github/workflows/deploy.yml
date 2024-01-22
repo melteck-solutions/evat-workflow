@@ -10,6 +10,7 @@ env:
   AZURE_WEBAPP_PACKAGE_PATH: '.'
   app-pool-name: evat-workflow-api
   site-name: evat-workflow-api
+  content-path: ''
 
 jobs:
   Build:
@@ -20,16 +21,16 @@ jobs:
       run : "echo location ${{github.workspace}}"
 
 
-    #- name: Download a Build Artifact
-    #  uses: actions/download-artifact@v2.0.5
-    #  with:
-    #    name: Parts
-    #    path: ${{github.workspace}}
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.0.5
+      with:
+        name: Parts
+        path: ${{github.workspace}}
 
 
-    #- name: Run Powershell
-    #  run: |
-    #    & '${{github.workspace}}deploy-app.ps1' -pool_name ${{env.app-pool-name}} -site_name ${{env.site-name}} - packagepath ${{env.contentpath}}
+    - name: Run Powershell
+      run: |
+        & '${{github.workspace}}deploy-app.ps1' -pool_name ${{env.app-pool-name}} -site_name ${{env.site-name}} - packagepath ${{env.content-path}}
 
 
 #name: eVAT-API-Build-Deployments
