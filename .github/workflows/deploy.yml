@@ -2,43 +2,34 @@
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   AZURE_WEBAPP_PACKAGE_PATH: '.'
-  AZURE_WEBAPP_NAME: evat-workflow-api
+  app-pool-name: evat-workflow-api
+  site-name: evat-workflow-api
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
-
+  Build:
+    runs-on: psl-app-vm3
     steps:
-    - uses: actions/checkout@v2
     
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore
-      
-    - name: Build
-      run: dotnet build --configuration Release
-      
-    - name: Publish
-      run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/evat-workflow-api'
-      
-    - name: Deploy
-      uses: Azure/webapps-deploy@v2
-      with:
-        app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        slot-name: 'development'
-        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/evat-workflow-api'
+    - name : "Workspace location"
+      run : "echo location ${{github.workspace}}"
+
+
+    #- name: Download a Build Artifact
+    #  uses: actions/download-artifact@v2.0.5
+    #  with:
+    #    name: Parts
+    #    path: ${{github.workspace}}
+
+
+    #- name: Run Powershell
+    #  run: |
+    #    & '${{github.workspace}}deploy-app.ps1' -pool_name ${{env.app-pool-name}} -site_name ${{env.site-name}} - packagepath ${{env.contentpath}}
 
 
 #name: eVAT-API-Build-Deployments
